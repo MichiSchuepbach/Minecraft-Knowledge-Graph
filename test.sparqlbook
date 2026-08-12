@@ -1,0 +1,14 @@
+[
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nselect * where { ?s ?p ?o}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "",
+    "metadata": {}
+  }
+]
