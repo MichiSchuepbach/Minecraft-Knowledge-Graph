@@ -2,13 +2,37 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nselect * where { ?s ?p ?o}",
+    "value": "# [endpoint=test_minecraft.ttl]\nconstruct  where { ?s ?p ?o}",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
     "value": "",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nask where { ?s ?p ?o}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nselect * where { ?s ?p ?o}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Block\nWHERE {\n  ?Block mc:minedWith mc:IronPickaxe .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?station\nWHERE {\n  mc:IronOre mc:minedWith ?werkzeug .\n  ?werkzeug mc:hasRecipe ?rezept .\n  ?rezept mc:craftedAt ?station .\n}",
     "metadata": {}
   }
 ]
