@@ -1,0 +1,141 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix mc: <http://www.minecraft.example/url/2002/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+mc:Item a rdfs:Class .
+mc:Block a rdfs:Class .
+mc:Recipes a rdfs:Class .
+mc:Tool a rdfs:Class .
+mc:CraftingStation a rdfs:Class .
+
+
+mc:Block rdfs:subClassOf mc:Item .
+mc:Tool rdfs:subClassOf mc:Item .
+
+
+
+mc:OakLog a mc:Block ; mc:hasName "Eichenstamm"@de, "Oak Log"@en .
+
+
+mc:Cobblestone a mc:Block ; mc:hasName "Bruchstein"@de, "Cobblestone"@en ;
+mc:minedWith mc:WoodenPickaxe .
+
+mc:IronOre a mc:Block ; mc:hasName "Eisenerz"@de, "Iron Ore"@en ;
+mc:minedWith mc:StonePickaxe .
+
+mc:Diamond a mc:Item ; mc:hasName "Diamant"@de, "Diamond"@en ;
+mc:minedWith mc:IronPickaxe .
+
+
+mc:Stick a mc:Item ; mc:hasName "Stocke"@de, "Stick"@en ;
+     mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 4;
+        mc:requiresIngredient [
+            mc:Item mc:OakPlanks ;
+            mc:amount 2
+        ]
+    ] .
+    
+mc:Craftingtable a mc:Block, mc:CraftingStation ; mc:hasName "Werkbank"@de, "Craftingtable"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:requiresIngredient [
+            mc:Item mc:OakPlanks ;
+            mc:amount 4
+        ]
+    ] .
+
+
+mc:OakPlanks a mc:Block ; mc:hasName "Eichenholzbretter"@de, "Oak Planks"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 4 ;
+        mc:requiresIngredient [
+            mc:Item mc:OakLog ;
+            mc:amount 1
+       ] 
+    ] .
+
+mc:WoodenPickaxe a mc:Tool ; mc:hasName "Holzspitzhacke"@de, "Wodden Pickaxe"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            mc:Item mc:OakPlanks ;
+            mc:amount 3
+        ], [
+            mc:Item mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+
+mc:StonePickaxe a mc:Tool ; mc:hasName "Steinspitzhacke"@de, "Stone Pickaxe"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            mc:Item mc:Cobblestone ;
+            mc:amount 3
+        ], [
+            mc:Item mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+mc:Furnace a mc:Block, mc:CraftingStation ; mc:hasName "Ofen"@de, "Furnace"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            mc:Item mc:Cobblestone ;
+            mc:amount 8
+        ]
+    ] .
+
+mc:IronIngot a mc:Item ; mc:hasName "Eisenbarren"@de, "Iron Ingot"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Furnace ;
+        mc:requiresIngredient [
+            mc:Item mc:IronOre ;
+            mc:amount 1
+        ]
+    ] .
+
+mc:IronPickaxe a mc:Tool ; mc:hasName "Eisenspitzhacke"@de, "Iron Pickaxe"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            mc:Item mc:IronIngot ;
+            mc:amount 3
+        ], [
+            mc:Item mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+
+mc:DiamondPickaxe a mc:Tool ; mc:hasName "Diamantspitzhacke"@de, "Diamond Pickaxe"@en ;
+    mc:hasRecipe [
+        a mc:Recipes ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            mc:Item mc:Diamond ;
+            mc:amount 3
+        ], [
+            mc:Item mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+
