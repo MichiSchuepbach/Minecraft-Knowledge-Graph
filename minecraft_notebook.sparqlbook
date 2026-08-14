@@ -1,0 +1,212 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# ⛏️ SPARQL-Abfragen auf dem Minecraft-Wissensgraph\n\n**Autor:** Michael Schüpbach  \n**Organisation:** Bundesamt für Landwirtschaft (BLW)  \n**Datum:** 14. August 2026  \n\n---\n\n### 📌 Projektübersicht & Ziel\nDieses Notebook führt schrittweise durch die Grundlagen und fortgeschrittenen Konzepte der Graph-Abfragesprache **SPARQL 1.1** (gemäß W3C-Spezifikation). \n\nAnhand einer eigens erstellten **Minecraft-RDF-Wissensbasis** werden theoretische SPARQL-Konzepte anschaulich erklärt und direkt in praxistauglichen Abfragen angewendet.\n\n",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Ausgangslage: Der Minecraft-Wissensgraph\n\nBevor wir SPARQL-Abfragen formulieren, betrachten wir unsere Datenbasis: die RDF-Wissensbasis (`test_minecraft.ttl`). Die Daten sind im Turtle-Format abgelegt und nutzen ein zentrales Prefix für alle Minecraft-Ressourcen:\n\n* **Prefix:** `mc:` `<http://www.minecraft.example/url/2002/>`\n* **Wichtige Entitäten im Graphen:**\n  * **Items & Blöcke:** z. B. `mc:Iron_Ore` (Eisenerz), `mc:Iron_Pickaxe` (Eisenspitzhacke)\n  * **Eigenschaften:** z. B. `mc:hasName`, `mc:minedWith`\n  * **Rezepte:** Verknüpfungen über Zutaten (`mc:requiresIngredient`) und Anonymknoten (Blank Nodes)\n\n---\n\n## 2. Was ist SPARQL? (Definition, Referenz & SQL-Vergleich)\n\n**SPARQL** (*SPARQL Protocol and RDF Query Language*) ist der offizielle Standard zum Abfragen von RDF-Graphen.\n\n> 📚 **Offizielle W3C-Spezifikation / Quelle:** > [W3C Recommendation: SPARQL 1.1 Query Language](https://www.w3.org/TR/sparql11-query/)\n\n### Funktionsweise & Vergleich zu SQL:\nIm Gegensatz zu relationalen Abfragesprachen (wie SQL), die in starren Tabellenzeilen und -spalten suchen, gleicht SPARQL **Graphen-Muster (Graph Patterns)** mit den Subjekt-Prädikat-Objekt-Tripeln der Wissensbasis ab.\n\n---\n\n## 3. Theoretische Grundlagen\n\n### 3.1 Die Bausteine eines RDF-Graphen\nDaten werden in RDF als Tripel dargestellt: `[Subjekt] -> [Prädikat] -> [Objekt]`. Dabei unterscheiden wir drei Arten von Elementen:\n\n1. **IRIs (Internationalized Resource Identifiers):** Eindeutige Identifikatoren/URIs für Objekte und Eigenschaften (z. B. `mc:Iron_Ore` oder `mc:hasName`).\n2. **Literale:** Konkrete Werte wie Texte oder Zahlen, oft mit Sprach-Tag oder Datentyp versehen (z. B. `\"Eisenerz\"@de` oder `\"Iron Ore\"@en`).\n3. **Blank Nodes (Anonyme Knoten):** Hüllknoten ohne eigene IRI, die genutzt werden, um zusammengehörige Strukturen zu gruppieren (z. B. komplexe Rezepte).\n\n### 3.2 Die 4 SPARQL-Abfragetypen (Query Forms)\nGemäß W3C-Standard gibt es vier verschiedene Arten, wie SPARQL Ergebnisse zurückliefert:\n\n| Abfragetyp | Funktion | Ausgabe-Format |\n| :--- | :--- | :--- |\n| **`SELECT`** | Liest Daten aus und gibt sie in einer klassischen Tabelle aus. | Tabelle (Variablen & Werte) |\n| **`ASK`** | Prüft, ob ein gesuchtes Muster im Graphen existiert. | `TRUE` oder `FALSE` |\n| **`CONSTRUCT`** | Erzeugt auf Basis bestehender Daten einen völlig neuen RDF-Teilgraphen. | RDF-Graph (Turtle) |\n| **`DESCRIBE`** | Holt alle verfügbaren Informationen und Tripel zu einer bestimmten Ressource. | RDF-Graph |\n\n*In diesem Notebook starten wir mit dem Abfragetyp: **`SELECT`**.*\n\n### 3.3 Das Prinzip der Schablonen-Suche (Graph Patterns)\nEine SPARQL-`SELECT`-Abfrage legt ein Suchmuster über den Graphen:\n* **Bekannte Werte** werden fest ausgeschrieben (z. B. die Eigenschaft `mc:hasName`).\n* **Unbekannte Werte** werden durch **Variablen** ersetzt, die mit einem Fragezeichen `?` beginnen (z. B. `?element` oder `?name`).\n\n---\n\n## 4. Anatomie unserer ersten Abfrage\n\nUm die Theorie in der Praxis zu testen, bauen wir unsere erste `SELECT`-Abfrage nach folgendem Schema auf:\n\n*Als ersten Schritt wollen wir eine einfache Inventarliste erstellen. Wir möchten wissen: Welche Elemente existieren in unserer Wissensbasis und welche Namen (`mc:hasName`) besitzen sie?*\n\n* **`PREFIX`**: Macht URIs lesbar (`mc:` statt `<http://www.minecraft.example/url/2002/>`).\n* **`SELECT ?element ?name`**: Erstellt zwei Spalten für unsere Ergebnistabelle.\n* **`WHERE { ?element mc:hasName ?name . }`**: Das Tripel-Muster, das alle Elemente und deren Namen sucht.\n\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element ?name\nWHERE {\n  ?element mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Daten präzise filtern mit `FILTER`\n\nIn realen Wissensgraphen liefert eine einfache Tripel-Suche meist sehr viele Ergebnisse. Die **`FILTER`**-Klausel schränkt die Treffer nach bestimmten Regeln ein.\n\n---\n\n### 5.1 Der Sprachfilter (`lang()`)\n\nRDF speichert Text-Literale häufig mit einem **Language Tag** (z. B. `\"Eisenerz\"@de` oder `\"Iron Ore\"@en`). Mit der Funktion `lang(?variable)` können wir gezielt die gewünschte Sprache herausfiltern.\n\n\n*Wir wollen in unserem Inventar ausschließlich die deutschen Bezeichnungen sehen, um englische Bezeichnungen auszusortieren.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n  FILTER (lang(?name) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 5.2 Text- & Mustersuche (`regex()` / Regular Expressions)\n\nMöchten wir nach bestimmten Textbausteinen innerhalb eines Namens suchen, nutzen wir die Funktion **`regex(?variable, \"Suchmuster\", \"i\")`**.\n* Das `\"i\"` als dritter Parameter sorgt dafür, dass Groß- und Kleinschreibung ignoriert werden (*case-insensitive*).\n\n*Ein Spieler sucht gezielt nach allen Werkzeugen oder Gegenständen, die das Wort **\"Spitzhacke\"** im Namen tragen.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n  FILTER (regex(?name, \"Spitzhacke\", \"i\"))\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 5.3 Logische Verknüpfungen (`&&` / `||`) & Mehrfach-Filter\n\nBedingungen lassen sich mit logischen Operatoren beliebig kombinieren:\n* **`&&` (UND):** Beide Bedingungen müssen erfüllt sein.\n* **`||` (ODER):** Mindestens eine Bedingung muss erfüllt sein.\n* **`!` (NICHT):** Kehrt eine Bedingung um.\n\n\n*Wir verbinden Sprach- und Textfilter: Wir suchen nur Gegenstände, deren Name auf **Deutsch** vorliegt **UND** das Wort **\"Eisen\"** enthält.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n  FILTER (lang(?name) = \"de\" && regex(?name, \"Eisen\", \"i\"))\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name \nWHERE {\n    ?item mc:hasName ?name .\n    FILTER (lang(?name) = \"de\" && regex(?name, \"Holz\", \"i\") || regex(?name, \"Eisen\", \"i\"))\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Verknüpfung von Tripelmustern\n\nBisher haben wir in den Abfragen immer nur eine einzelne Eigenschaft betrachtet. SPARQL entfaltet seine volle Leistungsfähigkeit, wenn **mehrere Tripelmuster miteinander verknüpft** werden.\n\n---\n\n### Das Prinzip gemeinsamer Variablen\n\nIn SPARQL verknüpft man Aussagen, indem zwei oder mehr Tripelmuster **dieselbe Variable teilen**. Die Datenbank durchsucht den Graphen nach Wegen, die alle Bedingungen gleichzeitig erfüllen.\n\n\n\nZusätzlich nutzen wir die **Semikolon-Syntax (`;`)**: Wenn sich mehrere Eigenschaften auf dasselbe Subjekt beziehen, trennt man die Aussagen mit einem Semikolon, statt das Subjekt doppelt aufzuschreiben.\n\n---\n\n### 6.1 Erste Verknüpfung: Blöcke und deren Abbau-Werkzeuge\n\nWir verknüpfen zwei Tripelmuster über die Variable `?werkzeug`:\n1. Welcher Block wird mit welchem Werkzeug abgebaut (`?block mc:minedWith ?werkzeug`)?\n2. Wie heißt dieses Werkzeug auf Deutsch (`?werkzeug mc:hasName ?werkzeugName`)?\n\n\n*Ein Spieler möchte wissen, welche Blöcke in der Welt existieren und welches konkrete Werkzeug benötigt wird, um sie abzubauen.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?blockName ?werkzeugName\nWHERE {\n  ?block mc:hasName ?blockName ;\n         mc:minedWith ?werkzeug .\n  ?werkzeug mc:hasName ?werkzeugName .\n  FILTER (lang(?blockName) = \"de\" && lang(?werkzeugName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 6.2 Erweiterte Verknüpfung: Gegenstände, Rezepte und Herstellungsort\n\nNun verknüpfen wir drei Ebenen im Graphen miteinander:\n1. Der Gegenstand und sein Name (`?item mc:hasName ?itemName`).\n2. Das dazugehörige Rezept (`?item mc:hasRecipe ?rezept`).\n3. Die Herstellungsstation aus dem Rezept (`?rezept mc:craftedAt ?station`) und deren Name (`?station mc:hasName ?stationName`).\n\n*Ein Spieler möchte eine Übersicht aller herstellbaren Gegenstände und wissen, an welcher Handwerksstation (z. B. Werkbank oder Ofen) das jeweilige Rezept ausgeführt werden muss.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe ?rezept .\n  ?rezept mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Umgang mit unvollständigen Daten (`OPTIONAL`)\n\nIn RDF-Wissensgraphen gilt die **Open World Assumption**: Es wird nicht davon ausgegangen, dass zu jedem Objekt alle Eigenschaften vollständig erfasst sind. \n\n\n---\n\n### Das Problem strikter Suchmuster\nWenn wir nach einer Eigenschaft suchen (z. B. `mc:minedWith`), filtert SPARQL strikt: Objekte, die diese Eigenschaft nicht besitzen (wie der Eichenstamm `mc:OakLog`), werden **vollständig aus der Ergebnistabelle entfernt**.\n\n### Die Lösung: Der `OPTIONAL`-Block\nMit der **`OPTIONAL { ... }`**-Klausel machen wir Teile des Graphmusters freiwillig:\n* Existiert die Information im Graphen, wird sie in die Variable geladen.\n* Existiert die Information nicht, bleibt das Feld in der Tabelle schlicht leer (`UNBOUND`), aber der Gegenstand wird **trotzdem angezeigt**.\n\n---\n\n### 7.1 Einfache `OPTIONAL`-Abfrage: Inventar mit optionalem Abbauwerkzeug\n\nWir fragen alle Gegenstände der Welt ab. Falls für ein Objekt ein Abbauwerkzeug definiert ist, soll dieses mit ausgegeben werden.\n\n\n*Ein Spieler möchte eine vollständige Übersicht aller Gegenstände im Spiel erhalten. Für Blöcke wie Erze soll das passende Werkzeug angezeigt werden; Blöcke ohne Abbauwerkzeug sollen jedoch nicht aus der Liste verschwinden.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 7.2 Mehrfache `OPTIONAL`-Klauseln: Werkzeuge und Rezepte kombinieren\n\nIn komplexen Graphen lassen sich mehrere `OPTIONAL`-Blöcke unabhängig voneinander kombinieren. Jeder `OPTIONAL`-Block wird separat ausgewertet.\n\n\n*Wir wollen für jeden Gegenstand prüfen:*\n1. *Benötigt er ein Abbauwerkzeug? (Falls ja, zeige es an)*\n2. *Besitzt er ein Herstellungsrezept samt Handwerksstation? (Falls ja, zeige die Station an)*\n\n*Gegenstände wie der Eichenstamm besitzen weder ein Abbauwerkzeug noch eine Herstellungsstation in unserer Datei, erscheinen aber dank beider `OPTIONAL`-Blöcke weiterhin sauber in der Hauptliste.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  OPTIONAL {\n    ?item mc:hasRecipe ?rezept .\n    ?rezept mc:craftedAt ?station .\n    ?station mc:hasName ?stationName .\n    FILTER (lang(?stationName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. Navigieren im Graphen mit Property Paths\n\nIn RDF-Graphen sind Informationen häufig über mehrere Zwischenknoten hinweg verschachtelt – in unserer Wissensbasis betrifft das vor allem die Rezepte mit ihren Anonymknoten (Blank Nodes).\n\n---\n\n### Was sind Property Paths?\nProperty Paths erlauben es, **Verbindungen über mehrere Kanten hinweg in einer einzigen Zeile** zu beschreiben. Der wichtigste Operator ist der **Sequenz-Pfad (`/`)**.\n\nStatt Zwischenschritte über Variablen aufzuschreiben, verkettet man Eigenschaften direkt:\n`?subjekt ex:eigenschaft1 / ex:eigenschaft2 ?objekt`\n\n---\n\n### 8.1 Abkürzung von Zwischenknoten: Gegenstand zur Handwerksstation\n\nWir fragen ab, an welcher Station ein Item hergestellt wird, ohne den Rezept-Knoten als eigene Variable mitführen zu müssen.\n\n\n*Ein Spieler möchte direkt wissen, an welcher Handwerksstation Gegenstände hergestellt werden, ohne technische Zwischenknoten abfragen zu müssen.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe / mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 8.2 Tief verschachtelte Pfade: Zutaten eines Werkzeugs finden\n\nUnsere Rezepte nutzen eine tiefe Verschachtelung (`mc:hasRecipe` -> `mc:requiresIngredient` -> `mc:Item`). Mit zwei Schrägstrichen springen wir direkt vom Werkzeug zum Zutat-Objekt.\n\n*Wir suchen gezielt nach den deutschen Namen aller Zutaten, die man für die Herstellung einer Holzspitzhacke benötigt.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\") \n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. Existenzprüfungen mit `ASK`\n\nIn vielen Anwendungen möchte man keine vollständige Ergebnistabelle auslesen, sondern lediglich eine schnelle **Ja/Nein-Frage** an die Wissensbasis stellen (z. B. für Regelprüfungen oder Validierungen).\n\n---\n\n### Was unterscheidet `ASK` von `SELECT`?\n* **`SELECT`:** Liefert Variablen und Belegungen als Tabelle zurück.\n* **`ASK`:** Prüft, ob es **mindestens eine Belegung** im Graphen gibt, die das `WHERE`-Muster erfüllt. Die Antwort ist ein boolescher Wert (`true` oder `false`).\n\nDa keine Variablen in einer Tabelle ausgegeben werden, entfällt die Aufzählung von Variablen hinter dem Befehl – es wird direkt `ASK WHERE { ... }` geschrieben.\n\n---\n\n### 9.1 Positive Existenzprüfung (`true`)\n\nWir prüfen, ob in unserer Wissensbasis ein Rezept existiert, um Eisenbarren an einem Ofen herzustellen.\n\n*Ein Spielmechanik-System möchte automatisiert prüfen, ob Eisenbarren tatsächlich im Ofen geschmolzen werden können, bevor eine Aktion freigeschaltet wird.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nASK WHERE {\n  ?item mc:hasName \"Eisenbarren\"@de ;\n        mc:hasRecipe / mc:craftedAt ?station .\n  ?station mc:hasName \"Ofen\"@de .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 9.2 Negative Existenzprüfung (`false`)\n\nWir prüfen, ob Eisenerz laut unserer Wissensbasis mit einer Holzspitzhacke abgebaut werden kann.\n\n*Ein Spieler versucht, Eisenerz mit einer Holzspitzhacke abzubauen. Das Spiel prüft in der Wissensbasis, ob diese Kombination zulässig ist.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nASK WHERE {\n  ?block mc:hasName \"Eisenerz\"@de ;\n         mc:minedWith / mc:hasName \"Holzspitzhacke\"@de . \n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 10. Neue Daten erzeugen & Graphen transformieren mit `CONSTRUCT`\n\nWährend `SELECT` eine flache Tabelle und `ASK` einen Ja/Nein-Wert liefert, erzeugt **`CONSTRUCT`** als Ergebnis einen **völlig neuen RDF-Graphen**. \n\n---\n\n### Der zweigeteilte Aufbau von `CONSTRUCT`\n\nEine `CONSTRUCT`-Abfrage besteht aus zwei zentralen Bausteinen:\n\n1. **`CONSTRUCT { [Neues Tripelmuster] }`**: Hier definierst du die Schablone für die **neuen Tripel**, die generiert werden sollen.\n2. **`WHERE { [Bestehendes Muster] }`**: Hier suchst du wie gewohnt nach den Quelldaten im bestehenden Graphen.\n\nFür jedes Matching im `WHERE`-Block baut SPARQL die im `CONSTRUCT`-Block definierten neuen Subjekt-Prädikat-Objekt-Beziehungen auf.\n\n---\n\n### 10.1 Inferenz & Invertierung von Beziehungen (Wissensanreicherung)\n\nIn unserer Wissensbasis ist bisher nur gespeichert, welcher Block mit welchem Werkzeug abgebaut wird (`mc:minedWith`). Für ein automatisches Regelsystem wollen wir die inverse (umgekehrte) Eigenschaft `mc:canMine` (\"kann abbauen\") für Werkzeuge erzeugen.\n\n*Wir wollen unsere Wissensbasis erweitern: Aus der Beziehung `?block mc:minedWith ?werkzeug` generieren wir automatisch ein neues Prädikat `?werkzeug mc:canMine ?block`.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?werkzeug mc:canMine ?block .\n}\nWHERE {\n  ?block mc:minedWith ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 10.2 Schema-Vereinfachung (Entfernen von Anonymknoten)\n\nIn unserer Wissensbasis sind Handwerksstationen über verschachtelte Rezept-Anonymknoten verknüpft (`mc:hasRecipe` -> `mc:craftedAt`). Für ein vereinfachtes Frontend möchten wir einen kompakten Teilgraphen erstellen, der Gegenstände direkt mit ihrer Handwerksstation über `mc:canBeCraftedAt` verbindet.\n\n*Ein Entwickler benötigt für eine einfache App-Übersicht einen schlanken Teilgraphen, der ohne die komplexen Rezept-Anonymknoten auskommt.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?item mc:canBeCraftedAt ?station .\n  ?item mc:hasName ?itemName .\n  ?station mc:hasName ?stationName .\n}\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe / mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 10.3 Kombinations-Beispiel 1: Property Paths (`/`) & `FILTER` im `CONSTRUCT`\n\nWir nutzen den **Sequenz-Pfad (`/`)**, um Rezepte direkt zu durchleuchten, und verknüpfen Endprodukte über ein neues Prädikat `mc:requiresDirectIngredient` mit ihren benötigten Zutaten. Zusätzlich filtern wir auf deutsche Bezeichnungen.\n\n*Wir bauen einen direkten \"Zutaten-Graphen\" auf. Aus der tiefen Verschachtelung `mc:hasRecipe / mc:requiresIngredient / mc:Item` erzeugen wir eine flache Direktverbindung zwischen Produkt und Zutat.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?produkt mc:requiresDirectIngredient ?zutat .\n  ?produkt mc:hasName ?produktName .\n  ?zutat mc:hasName ?zutatName .\n}\nWHERE {\n  ?produkt mc:hasName ?produktName ;\n           mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?produktName) = \"de\" && lang(?zutatName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "### 10.4 Kombinations-Beispiel 2: `OPTIONAL` im `CONSTRUCT` (Tolerante Graphen-Erzeugung)\n\nWir erzeugen einen neuen Informations-Graphen für alle Items. Auch wenn manche Blöcke (wie `mc:OakLog`) kein Abbau-Werkzeug besitzen, sollen sie im neuen Graphen enthalten sein. Wenn ein Werkzeug existiert, wird die neue Beziehung `mc:minedByTool` mit in den neuen Teilgraphen gewoben.\n\n*Ein Daten-Export soll alle Items als RDF aufbereiten. Fehlende Eigenschaften (wie Abbauwerkzeuge) dürfen das Item im neuen Graphen nicht verhindern, sollen aber ergänzt werden, falls vorhanden.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?item mc:hasName ?itemName .\n  ?item mc:minedByTool ?werkzeugName .\n}\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "\nIn diesem Notebook wurden die Kernkonzepte von **SPARQL 1.1** gemäß W3C-Standard praxisnah an unserer Minecraft-Wissensbasis (`test_minecraft.ttl`) demonstriert:\n\n* **`SELECT`:** Fundament der Tripel-Suche, Präzisierung durch `FILTER` (Language Tags, Textsuche, Logik), Verknüpfung von Tripelmustern sowie tolerante Abfragen unvollständiger Daten mit `OPTIONAL`.\n* **Property Paths (`/`):** Elegante Navigation durch verschachtelte Graph-Strukturen und Anonymknoten (Blank Nodes) ohne unnötige Zwischenvariablen.\n* **`ASK`:** Effiziente Ja/Nein-Existenzprüfungen zur automatisierten Regelvalidierung.\n* **`CONSTRUCT`:** Transformation bestehender RDF-Daten in völlig neue Teilgraphen (Invertierung von Beziehungen, Schema-Vereinfachungen und Wissensanreicherung).\n",
+    "metadata": {}
+  }
+]
