@@ -1,0 +1,68 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "🎓 Block 1: SPARQL Grundlagen & Satzzeichen-Grammatik1.1 Theorie: Anatomie eines SPARQL-Queries & SatzzeichenIn SPARQL gleicht jedes Graph-Muster einem RDF-Tripel: Subjekt $\\rightarrow$ Prädikat $\\rightarrow$ Objekt.  Die Bedeutung jedes Zeichens:PREFIX & : (Doppelpunkt): Verhindert lange URIs. Hinter dem Doppelpunkt steht der lokale Bezeichner (z. B. mc:Iron_Ore anstelle von <http://www.minecraft.example/url/2002/Iron_Ore>).  ? (Fragezeichen): Kennzeichnet eine Variable. Es steht als Platzhalter für Knoten oder Kanten, die der Query-Engine noch unbekannt sind.  { } (Geschweifte Klammern): Schließen den Muster-Block (WHERE { ... }) ein. Alles darin muss gleichzeitig im Graphen matchen.. (Punkt): Schließt ein Tripelmuster ab (analog zum Satzende-Punkt).; (Semikolon): Prädikaten-Abkürzung. Wiederholt automatisch das Subjekt aus der vorherigen Zeile.@ (At-Zeichen): Weist ein Language-Tag an ein Literal zu (z. B. \"Eisenerz\"@de).  📝 Aufgabe 1: Die einfache Inventarliste (Einstieg)Aufgabenstellung:\nSchreibe eine Abfrage, die alle Ressourcen (?element) und deren Namen (?name) über das Prädikat mc:hasName findet.  Zu begründende Zeichen:\n1. Warum steht vor element ein ?? \n2. Was bewirkt der . am Ende der Zeile im WHERE-Block? ",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/> \n\nSELECT * WHERE {?s ?p ?o}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element ?name\nWHERE {\n  ?element mc:hasName ?name . \n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?s ?name\nWHERE {\n  ?s mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?name\nWHERE {\n  ?s mc:hasName ?name .\n  ?s mc:minedWith ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?name\nWHERE {\n  ?item mc:minedWith ?werkzeug.\n  ?item mc:hasName ?name.\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?allitems ?name\nWHERE {\n  ?allitems mc:hasName ?name.\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?blocks ?name\nWHERE {\n  ?blocks mc:a mc:blocks.\n  ?item mc:hasName ?name.\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?name\nWHERE {\n  ?block a mc:Block .\n  ?block mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?werkzeug\nWHERE {\n    ?item mc:minedWith ?werkzeug .\n}\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "",
+    "metadata": {}
+  }
+]
