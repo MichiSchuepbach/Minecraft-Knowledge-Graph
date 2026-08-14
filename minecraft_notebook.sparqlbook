@@ -104,13 +104,19 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  OPTIONAL {\n    ?item mc:hasRecipe ?rezept .\n    ?rezept mc:craftedAt ?station .\n    ?station mc:hasName ?stationName .\n    FILTER (lang(?stationName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName .\n  FILTER (lang(?itemName) = \"de\")\n\n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  OPTIONAL {\n    ?item mc:hasRecipe ?rezept .\n    ?rezept mc:craftedAt ?station .\n    ?station mc:hasName ?stationName .\n    FILTER (lang(?stationName) = \"de\")\n  }\n}",
     "metadata": {}
   },
   {
     "kind": 1,
     "language": "markdown",
     "value": "## 8. Navigieren im Graphen mit Property Paths\n\nIn RDF-Graphen sind Informationen häufig über mehrere Zwischenknoten hinweg verschachtelt – in unserer Wissensbasis betrifft das vor allem die Rezepte mit ihren Anonymknoten (Blank Nodes).\n\n---\n\n### Was sind Property Paths?\nProperty Paths erlauben es, **Verbindungen über mehrere Kanten hinweg in einer einzigen Zeile** zu beschreiben. Der wichtigste Operator ist der **Sequenz-Pfad (`/`)**.\n\nStatt Zwischenschritte über Variablen aufzuschreiben, verkettet man Eigenschaften direkt:\n`?subjekt ex:eigenschaft1 / ex:eigenschaft2 ?objekt`\n\n---\n\n### 8.1 Abkürzung von Zwischenknoten: Gegenstand zur Handwerksstation\n\nWir fragen ab, an welcher Station ein Item hergestellt wird, ohne den Rezept-Knoten als eigene Variable mitführen zu müssen.\n\n\n*Ein Spieler möchte direkt wissen, an welcher Handwerksstation Gegenstände hergestellt werden, ohne technische Zwischenknoten abfragen zu müssen.*",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n#aus dem Verschachtelung Kapitel\nSELECT ?itemName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe ?rezept .\n  ?rezept mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
     "metadata": {}
   },
   {
@@ -129,6 +135,12 @@
     "kind": 2,
     "language": "sparql",
     "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\") \n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n#das gelcihe aber ohne den /\n\nSELECT ?zutatName\nWHERE {\n  \n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        mc:hasRecipe ?rezept .\n  \n  ?rezept mc:requiresIngredient ?zutatKnoten .\n  \n  ?zutatKnoten mc:Item ?zutat .\n  \n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\")\n}",
     "metadata": {}
   },
   {
@@ -189,18 +201,6 @@
     "kind": 2,
     "language": "sparql",
     "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?produkt mc:requiresDirectIngredient ?zutat .\n  ?produkt mc:hasName ?produktName .\n  ?zutat mc:hasName ?zutatName .\n}\nWHERE {\n  ?produkt mc:hasName ?produktName ;\n           mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?produktName) = \"de\" && lang(?zutatName) = \"de\")\n}",
-    "metadata": {}
-  },
-  {
-    "kind": 1,
-    "language": "markdown",
-    "value": "### 10.4 Kombinations-Beispiel 2: `OPTIONAL` im `CONSTRUCT` (Tolerante Graphen-Erzeugung)\n\nWir erzeugen einen neuen Informations-Graphen für alle Items. Auch wenn manche Blöcke (wie `mc:OakLog`) kein Abbau-Werkzeug besitzen, sollen sie im neuen Graphen enthalten sein. Wenn ein Werkzeug existiert, wird die neue Beziehung `mc:minedByTool` mit in den neuen Teilgraphen gewoben.\n\n*Ein Daten-Export soll alle Items als RDF aufbereiten. Fehlende Eigenschaften (wie Abbauwerkzeuge) dürfen das Item im neuen Graphen nicht verhindern, sollen aber ergänzt werden, falls vorhanden.*",
-    "metadata": {}
-  },
-  {
-    "kind": 2,
-    "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n  ?item mc:hasName ?itemName .\n  ?item mc:minedByTool ?werkzeugName .\n}\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
     "metadata": {}
   },
   {
