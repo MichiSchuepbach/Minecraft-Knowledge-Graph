@@ -1,0 +1,38 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Subclass of\n\nUm zu verstehenn was rdfs:subclass im Semantic Web Konetxt genau bedeutet müssen wir zuerst verstehen was rdf: type of = a gneau heisst. Es verbindet ein konkretes individum mit einer Klasse. Ein einzelnes Ding wird einer Klasse zugewiesen. \n\nDas rdfs: Subclass ist etwas höher es verbindet nicht einzelne Elemente sonder es verbidnet 2 eigenständige Klassen miteinander. Es ist nicht auf der Objektebene es ist eine Stufe darüber. Es ist auf Schema Ebene es verbindet 2 Konzepte miteinander und hier kommt dann auch die Verbeung ist spiel. \n\nDer VOrteil von Subclass ist also das wir nicht nur das explizite Wissen von Verbinungen haben sondern auch das implizite soll heissen in unseree Wissenbasis ist Eichenholzstämme mit einem Triple nur als Block Definiert. Weil aber Block eine Subclass von Itmes ist. Sind die Eichenholzstämme auch ein Item ohne das wir das je als eignestädniges Tripple notiert haben\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\n\nCONSTRUCT {                                      #Hier defineiren wir was wir gebaut haben möchten vom Construct, Wir wollen die Triples der Ressourcen und der dazu vergebene Oberklasse\n    ?instanz a ?oberklasse .\n}\nWHERE {\n    ?instanz a ?unterklasse .                     # Finde jedes Individuum (?instanz) und die hinterlegte Klasse (?unterklasse)\n    ?unterklasse rdfs:subClassOf ?oberklasse .      # Prüfe in der Ontologie, ob die Klasse eine übergeordnete Klasse (?oberklasse) besitzt\n    FILTER NOT EXISTS {                         \n        ?instanz a ?oberklasse .                # Behält nur die Treffer, bei denen die Beziehung im Graphen noch NICHT explizit existiert\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# SubProperty\n\nProperty braucht man nicht für Instanzen sonder für Prädikate es wird also nciht verweden bei den einzelnen Items sonder bei den Beziungen zwischen den Instanzen.\nHier wird festgelgt um was für eien bezihung es sich wriklich handelt. Die Subproperty Definiert nun nciht die eigneltiche Beziung sonder die Sub beziung unter den Prädikaten\n\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    # Erzeuge die abgeleitete allgemeinere Beziehung\n    ?s ?oberEigenschaft ?o .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?unterEigenschaft ?o .\n    \n    # 2. Prüfe, ob dafür eine Ober-Eigenschaft im Schema existiert\n    ?unterEigenschaft rdfs:subPropertyOf ?oberEigenschaft .\n    \n    # 3. Nur ausgeben, falls diese Verbindung noch nicht explizit gespeichert war\n    FILTER NOT EXISTS {\n        ?s ?oberEigenschaft ?o .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Domain",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Range",
+    "metadata": {}
+  }
+]

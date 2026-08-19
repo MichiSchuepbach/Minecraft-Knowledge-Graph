@@ -2,7 +2,7 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "# ⛏️ SPARQL-Abfragen auf dem Minecraft-Wissensgraph\n\n**Autor:** Michael Schüpbach  \n**Organisation:** Bundesamt für Landwirtschaft (BLW)  \n**Datum:** 14. August 2026  \n\n---\n\n### 📌 Projektübersicht & Ziel\nDieses Notebook führt schrittweise durch die Grundlagen und fortgeschrittenen Konzepte der Graph-Abfragesprache **SPARQL 1.1** (gemäß W3C-Spezifikation). \n\nAnhand einer eigens erstellten **Minecraft-RDF-Wissensbasis** werden theoretische SPARQL-Konzepte anschaulich erklärt und direkt in praxistauglichen Abfragen angewendet.\n\n",
+    "value": "# ⛏️ SPARQL-Abfragen auf dem Minecraft-Wissensgraph\n\n**Autor:** Michael Schüpbach  \n**Organisation:** Bundesamt für Landwirtschaft (BLW)  \n**Datum:** 17. August 2026  \n\n---\n\n### 📌 Projektübersicht & Ziel\nDieses Notebook führt schrittweise durch die Grundlagen und fortgeschrittenen Konzepte der Graph-Abfragesprache **SPARQL 1.1** (gemäß W3C-Spezifikation). \n\nAnhand einer eigens erstellten **Minecraft-RDF-Wissensbasis** werden theoretische SPARQL-Konzepte anschaulich erklärt und direkt in praxistauglichen Abfragen angewendet.\n\n",
     "metadata": {}
   },
   {
@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?s ?name\nWHERE {\n  ?s mc:hasName ?name .\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n}",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n  FILTER (lang(?name) = \"de\")\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?name\nWHERE {\n  ?item mc:hasName ?name .\n  FILTER (lang(?name) = \"DE\")\n}",
     "metadata": {}
   },
   {
@@ -98,7 +98,7 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 7. Umgang mit unvollständigen Daten (`OPTIONAL`)\n\nIn RDF-Wissensgraphen gilt die **Open World Assumption**: Es wird nicht davon ausgegangen, dass zu jedem Objekt alle Eigenschaften vollständig erfasst sind. \n\n\n---\n\n### Das Problem strikter Suchmuster\nWenn wir nach einer Eigenschaft suchen (z. B. `mc:minedWith`), filtert SPARQL strikt: Objekte, die diese Eigenschaft nicht besitzen (wie der Eichenstamm `mc:OakLog`), werden **vollständig aus der Ergebnistabelle entfernt**.\n\n### Die Lösung: Der `OPTIONAL`-Block\nMit der **`OPTIONAL { ... }`**-Klausel machen wir Teile des Graphmusters freiwillig:\n* Existiert die Information im Graphen, wird sie in die Variable geladen.\n* Existiert die Information nicht, bleibt das Feld in der Tabelle schlicht leer (`UNBOUND`), aber der Gegenstand wird **trotzdem angezeigt**.\n\n---\n\n### 7.1 Einfache `OPTIONAL`-Abfrage: Inventar mit optionalem Abbauwerkzeug\n\nWir fragen alle Gegenstände der Welt ab. Falls für ein Objekt ein Abbauwerkzeug definiert ist, soll dieses mit ausgegeben werden.\n\n\n*Ein Spieler möchte eine vollständige Übersicht aller Gegenstände im Spiel erhalten. Für Blöcke wie Erze soll das passende Werkzeug angezeigt werden; Blöcke ohne Abbauwerkzeug sollen jedoch nicht aus der Liste verschwinden.*",
+    "value": "## 7. Umgang mit unvollständigen Daten (`OPTIONAL`)\n\nIn RDF-Wissensgraphen wird nicht davon ausgegangen, dass zu jedem Objekt alle Eigenschaften vollständig erfasst sind. \n\n\n---\n\n### Das Problem strikter Suchmuster\nWenn wir nach einer Eigenschaft suchen (z. B. `mc:minedWith`), filtert SPARQL strikt: Objekte, die diese Eigenschaft nicht besitzen (wie der Eichenstamm `mc:OakLog`), werden **vollständig aus der Ergebnistabelle entfernt**.\n\n### Die Lösung: Der `OPTIONAL`-Block\nMit der **`OPTIONAL { ... }`**-Klausel machen wir Teile des Graphmusters freiwillig:\n* Existiert die Information im Graphen, wird sie in die Variable geladen.\n* Existiert die Information nicht, bleibt das Feld in der Tabelle schlicht leer (`UNBOUND`), aber der Gegenstand wird **trotzdem angezeigt**.\n\n---\n\n### 7.1 Einfache `OPTIONAL`-Abfrage: Inventar mit optionalem Abbauwerkzeug\n\nWir fragen alle Gegenstände der Welt ab. Falls für ein Objekt ein Abbauwerkzeug definiert ist, soll dieses mit ausgegeben werden.\n\n\n*Ein Spieler möchte eine vollständige Übersicht aller Gegenstände im Spiel erhalten. Für Blöcke wie Erze soll das passende Werkzeug angezeigt werden; Blöcke ohne Abbauwerkzeug sollen jedoch nicht aus der Liste verschwinden.*",
     "metadata": {}
   },
   {
@@ -128,7 +128,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName .\n  \n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n    \n    ?item mc:hasRecipe ?rezept .\n    ?rezept mc:craftedAt ?station .\n    ?station mc:hasName ?stationName .\n    FILTER (lang(?stationName) = \"de\")\n  }\n  \n  FILTER (lang(?itemName) = \"de\")\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?werkzeugName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName .\n  FILTER (lang(?itemName) = \"de\")\n\n  OPTIONAL {\n    ?item mc:minedWith ?werkzeug .\n    ?werkzeug mc:hasName ?werkzeugName .\n    FILTER (lang(?werkzeugName) = \"de\")\n    \n    ?item mc:hasRecipe ?rezept .\n    ?rezept mc:craftedAt ?station .\n    ?station mc:hasName ?stationName .\n    FILTER (lang(?stationName) = \"de\")\n  }\n  \n}",
     "metadata": {}
   },
   {
@@ -146,43 +146,7 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 8. Navigieren im Graphen mit Property Paths\n\nIn RDF-Graphen sind Informationen häufig über mehrere Zwischenknoten hinweg verschachtelt – in unserer Wissensbasis betrifft das vor allem die Rezepte mit ihren Anonymknoten (Blank Nodes).\n\n---\n\n### Was sind Property Paths?\nProperty Paths erlauben es, **Verbindungen über mehrere Kanten hinweg in einer einzigen Zeile** zu beschreiben. Der wichtigste Operator ist der **Sequenz-Pfad (`/`)**.\n\nStatt Zwischenschritte über Variablen aufzuschreiben, verkettet man Eigenschaften direkt:\n`?subjekt ex:eigenschaft1 / ex:eigenschaft2 ?objekt`\n\n---\n\n### 8.1 Abkürzung von Zwischenknoten: Gegenstand zur Handwerksstation\n\nWir fragen ab, an welcher Station ein Item hergestellt wird, ohne den Rezept-Knoten als eigene Variable mitführen zu müssen.\n\n\n*Ein Spieler möchte direkt wissen, an welcher Handwerksstation Gegenstände hergestellt werden, ohne technische Zwischenknoten abfragen zu müssen.*",
-    "metadata": {}
-  },
-  {
-    "kind": 2,
-    "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n#aus dem Verschachtelung Kapitel\nSELECT ?itemName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe ?rezept .\n  ?rezept mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
-    "metadata": {}
-  },
-  {
-    "kind": 2,
-    "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName ?stationName\nWHERE {\n  ?item mc:hasName ?itemName ;\n        mc:hasRecipe / mc:craftedAt ?station .\n  ?station mc:hasName ?stationName .\n  FILTER (lang(?itemName) = \"de\" && lang(?stationName) = \"de\")\n}",
-    "metadata": {}
-  },
-  {
-    "kind": 1,
-    "language": "markdown",
-    "value": "### 8.2 Tief verschachtelte Pfade: Zutaten eines Werkzeugs finden\n\nUnsere Rezepte nutzen eine tiefe Verschachtelung (`mc:hasRecipe` -> `mc:requiresIngredient` -> `mc:Item`). Mit zwei Schrägstrichen springen wir direkt vom Werkzeug zum Zutat-Objekt.\n\n*Wir suchen gezielt nach den deutschen Namen aller Zutaten, die man für die Herstellung einer Holzspitzhacke benötigt.*",
-    "metadata": {}
-  },
-  {
-    "kind": 2,
-    "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\") \n}",
-    "metadata": {}
-  },
-  {
-    "kind": 2,
-    "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n#das gelcihe aber ohne den /\n\nSELECT ?zutatName\nWHERE {\n  \n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        mc:hasRecipe ?rezept .\n  \n  ?rezept mc:requiresIngredient ?zutatKnoten .\n  \n  ?zutatKnoten mc:Item ?zutat .\n  \n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\")\n}",
-    "metadata": {}
-  },
-  {
-    "kind": 1,
-    "language": "markdown",
-    "value": "## 8. Navigieren im Graphen mit Property Paths\n\nIn realen RDF-Wissensgraphen sind zusammenhängende Informationen selten in einem einzigen direkten Tripel abgelegt. Häufig liegen Daten über Ketten von Zwischenknoten (Blank Nodes) verstreut oder Beziehungen müssen in umgekehrter Richtung ausgewertet werden.\n\nKlassisch erfordert jede Kante im Graphen eine eigene Zeile und eine temporäre Hilfsvariable im `WHERE`-Block. **Property Paths (SPARQL 1.1)** lösen dieses Problem: Sie ermöglichen kompakte Pfad-Ausdrücke, um komplexe Graphstrukturen, Alternativen und Vererbungshierarchien in einer einzigen Zeile zu durchqueren.\n\n---\n\n### 🗺️ Übersicht der SPARQL 1.1 Pfad-Operatoren\n\n| Operator | Pfad-Typ | Bedeutung | Beispiel in Minecraft |\n| :--- | :--- | :--- | :--- |\n| **`/`** | **Sequenz** | Kanten nacheinander ablaufen (Verkettung) | `mc:hasRecipe / mc:craftedAt` |\n| **`^`** | **Invers** | Kantenrichtung umkehren (von Objekt zu Subjekt) | `^mc:minedWith` *(Welche Blöcke baut Tool X ab?)* |\n| **`\\|`** | **Alternative** | Pfad A **oder** Pfad B auf Prädikatsebene | `mc:minedWith \\| (mc:hasRecipe/mc:craftedAt)` |\n| **`+`** | **Transitiv (1..n)** | Beliebig viele Schritte (mind. 1) rekursiv folgen | `rdfs:subClassOf+` *(Unterklassen über alle Stufen)* |\n| **`*`** | **Reflexiv-Transitiv**| 0 bis n Schritte (schliesst Startknoten mit ein) | `rdfs:subClassOf*` *(Klasse selbst + Unterklassen)* |\n| **`?`** | **Optionaler Pfad** | Kante existiert 0-mal oder 1-mal | `mc:minedWith?` |\n| **`!`** | **Negation** | Jede Kante **ausser** der angegebenen | `!(mc:hasName)` |\n\n---\n\n### 8.1 Der Sequenz-Pfad (`/`): Zwischenknoten überspringen\n\nEin Spieler möchte wissen, an welcher Handwerksstation Gegenstände hergestellt werden. Im RDF-Graphen zeigt `mc:hasRecipe` auf einen anonymen Rezeptknoten, welcher wiederum über `mc:craftedAt` auf die Werkbank verweist.\n\nMit dem Sequenz-Operator `/` schreiben wir diesen Pfad in einer einzigen Kette auf.",
+    "value": "## 8. Navigieren im Graphen mit Property Paths\n\nIn realen RDF-Wissensgraphen sind zusammenhängende Informationen selten in einem einzigen direkten Tripel abgelegt. Häufig liegen Daten über Ketten von Zwischenknoten (Blank Nodes) verstreut oder Beziehungen müssen in umgekehrter Richtung ausgewertet werden.\n\nKlassisch erfordert jede Kante im Graphen eine eigene Zeile und eine temporäre Hilfsvariable im `WHERE`-Block. **Property Paths (SPARQL 1.1)** lösen dieses Problem: Sie ermöglichen kompakte Pfad-Ausdrücke, um komplexe Graphstrukturen, Alternativen und Vererbungshierarchien in einer einzigen Zeile zu durchqueren.\n\n---\n\n### 🗺️ Übersicht der SPARQL 1.1 Pfad-Operatoren\n\n| Operator | Pfad-Typ | Bedeutung | Beispiel in Minecraft |\n| :--- | :--- | :--- | :--- |\n| **`/`** | **Sequenz** | Kanten nacheinander ablaufen (Verkettung) | `mc:hasRecipe / mc:craftedAt` |\n| **`^`** | **Invers** | Kantenrichtung umkehren (von Objekt zu Subjekt) | `^mc:minedWith` *(Welche Blöcke baut Tool X ab?)* |\n| **`\\|`** | **Alternative** | Pfad A **oder** Pfad B auf Prädikatsebene | `mc:minedWith \\| (mc:hasRecipe/mc:craftedAt)` |\n\n\n---\n\n### 8.1 Der Sequenz-Pfad (`/`): Zwischenknoten überspringen\n\nEin Spieler möchte wissen, an welcher Handwerksstation Gegenstände hergestellt werden. Im RDF-Graphen zeigt `mc:hasRecipe` auf einen anonymen Rezeptknoten, welcher wiederum über `mc:craftedAt` auf die Werkbank verweist.\n\nMit dem Sequenz-Operator `/` schreiben wir diesen Pfad in einer einzigen Kette auf.",
     "metadata": {}
   },
   {
@@ -242,13 +206,13 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n# Klassisch: 3 Tripelmuster mit Hilfsvariablen (?rezept, ?zutatKnoten)\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Diamantspitzhacke\"@de ;\n        mc:hasRecipe ?rezept .\n  ?rezept mc:requiresIngredient ?zutatKnoten .\n  ?zutatKnoten mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\")\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Diamantspitzhacke\"@de ;\n        mc:hasRecipe ?rezept .\n  ?rezept mc:requiresIngredient ?zutatKnoten .\n  ?zutatKnoten mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\")\n}",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n# Elegant: Ein einziger Pfad navigiert über beide Anonymknoten hinweg direkt zur Zutat\nSELECT ?zutatName\nWHERE {\n  ?tool mc:hasName \"Diamantspitzhacke\"@de ;\n        mc:hasRecipe / mc:requiresIngredient / mc:Item ?zutat .\n  ?zutat mc:hasName ?zutatName .\n  FILTER (lang(?zutatName) = \"de\")\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?itemName\nWHERE {\n  ?tool mc:hasName \"Holzspitzhacke\"@de ;\n        (mc:hasRecipe / mc:requiresIngredient / mc:Item )+ ?item .\n  FILTER NOT EXISTS {\n    ?item mc:hasRecipe ?x .\n  }\n  ?item mc:hasName ?itemName .\n  FILTER (lang(?itemName) = \"de\")\n}",
     "metadata": {}
   },
   {
@@ -320,7 +284,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\n# Findet alle Handwerksstationen und liefert deren vollständige RDF-Beschreibungen\nDESCRIBE ?station\nWHERE {\n  ?station a mc:CraftingStation .\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nDESCRIBE ?station\nWHERE {\n  ?station a mc:CraftingStation .\n}",
     "metadata": {}
   },
   {
