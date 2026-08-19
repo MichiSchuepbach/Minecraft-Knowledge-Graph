@@ -14,25 +14,37 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "# SubProperty\n\nProperty braucht man nicht für Instanzen sonder für Prädikate es wird also nciht verweden bei den einzelnen Items sonder bei den Beziungen zwischen den Instanzen.\nHier wird festgelgt um was für eien bezihung es sich wriklich handelt. Die Subproperty Definiert nun nciht die eigneltiche Beziung sonder die Sub beziung unter den Prädikaten\n\n",
+    "value": "# SubProperty\n\nUm zu verstehen was eine SubProperty ist müssen wir erst verstehen was eine Property ist. EIne Property ist kein Objekt sondern eine Beziung der Vergelcih zu SQL gibt es bei Klassen immer starre Attribute. Das ist hier nicht so eien Property ist ein unabhängiges Objekt. das rdf:Property könnte man so weit gehen und sagen es ist die Klasse aller Beziungen zwischen den Instanzen.\n\nJetzt die rdfs:suproperty das ist sehr ähnlich zu dem Prinzip der Subclass hier geht es auch wieder um die vererbung einer Oberbezihung zu der verbunden Unterbeziehung.\n\nIn meinem Wissengraph gab es das bisher nich deshalb habe ich ein Beispiel ergenzt. \n\nEs gibt jetzt das neue Property mc:requiresInteractionTool dies ist die Superproperty. Daran angehängt wurde das bestehende Property mc:minedWith dies ist jetzt also das SubProperty von mc:requiresInteractionTool.\n\nWas bedeutet das jetzt?     Obwohl in unsere Wissenabasis nir\n\n\n\n",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    # Erzeuge die abgeleitete allgemeinere Beziehung\n    ?s ?oberEigenschaft ?o .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?unterEigenschaft ?o .\n    \n    # 2. Prüfe, ob dafür eine Ober-Eigenschaft im Schema existiert\n    ?unterEigenschaft rdfs:subPropertyOf ?oberEigenschaft .\n    \n    # 3. Nur ausgeben, falls diese Verbindung noch nicht explizit gespeichert war\n    FILTER NOT EXISTS {\n        ?s ?oberEigenschaft ?o .\n    }\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX : <http://www.minecraft.example/url/2002/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    # Erzeuge die abgeleitete allgemeinere Beziehung\n    ?s ?superProperty ?o .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?subProperty ?o .\n    \n    # 2. Prüfe, ob dafür eine Ober-Eigenschaft im Schema existiert\n    ?subProperty rdfs:subPropertyOf ?superProperty .\n    \n    # 3. Nur ausgeben, falls diese Verbindung noch nicht explizit gespeichert war\n    FILTER NOT EXISTS {\n        ?s ?superProperty ?o .\n    }\n}",
     "metadata": {}
   },
   {
     "kind": 1,
     "language": "markdown",
-    "value": "# Domain",
+    "value": "# Domain\n\nGanz einfach gesprochen ist die Domain der Definitionsbereich einer Eigenschaft. Also die Defintion davon, wo der Pfeil startet (beim Subjekt) Es ist kein relationaler Zwang: Eine Instanz muss diese Eigenschaft nicht zwingend besitzen. Das Schema sagt jedoch aus: Wenn du diese Eigenschaft nutzt, leitet der Reasonser automatisch ab, dass das Subjekt zu dieser in der Domain geschrieben Klasse gehört.\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?s a ?domainKlasse .            # Hier defineiren wir was wir gebaut haben möchten vom Construct\n}\nWHERE {\n    ?s ?p ?o .                      # Hier die Struktur das wir uns alle Tripples anschauen möchten Subjekt -> Objekt -> Prädikat\n    \n    ?p rdfs:domain ?domainKlasse .\n    \n    FILTER NOT EXISTS {\n        ?s a ?domainKlasse .            # Nur ableiten, wenn das Subjekt diesen Typ noch NICHT explizit besitzt\n    }\n}",
     "metadata": {}
   },
   {
     "kind": 1,
     "language": "markdown",
-    "value": "# Range",
+    "value": "# Range\n\nDie Range ist das Gegenstück zur Domain. Hier wird definiert wo der Pfeil am Ende beim Objekt ankommen soll. Auch hier glit die regel dies ist nicht absoultes ist auch möglich das dort ein anderes Objekt stehen wird. Nur wieder der Reasoner wird automatisch implzieren das wenn ein Objekt an dieser Stelle des Triples steht wird dieeser Range Klasse zugeweisen werden.\n",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .\n    \n    ?p rdfs:range ?rangeKlasse .\n    \n    FILTER(isIRI(?o) || isBlank(?o))\n    \n    FILTER NOT EXISTS {                         #  Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
     "metadata": {}
   }
 ]
