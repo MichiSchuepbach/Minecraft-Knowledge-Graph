@@ -1,0 +1,13 @@
+# ROBOT-Werkzeuge (Sehr große Binärdateien gehören nicht ins Git)
+robot
+robot.jar
+
+# VS Code & Notebook Caches
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.vscode/
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
