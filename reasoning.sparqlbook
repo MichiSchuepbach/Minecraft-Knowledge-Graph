@@ -44,7 +44,85 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .\n    \n    ?p rdfs:range ?rangeKlasse .\n    \n    FILTER(isIRI(?o) || isBlank(?o))\n    \n    FILTER NOT EXISTS {                         #  Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .                                  # Findet ein Tripel in den Daten\n    \n    ?p rdfs:range ?rangeKlasse .                # Prüfe in der Ontologie, ob für dieses Prädikat eine Range-Klasse definiert ist\n    \n    FILTER(isIRI(?o) || isBlank(?o))            # Wichtig: Nur Ressourcen/Knoten prüfen (Literale wie Texte oder Zahlen bekommen kein 'a')\n    \n    FILTER NOT EXISTS {                         #  Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Vergleich nach Reasoning ",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Subclass Beweis: Abfrage auf altes Turtel FIle",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element\nWHERE {\n  ?element a mc:Item .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "1. Warum bleibt die Tabelle bei test_minecraft.ttl leer?  In der Orignal Datei ist nichts direkt als Tripple als Item deefiniert.\n\nmc:Cobblestone a mc:Block .\n\nmc:WoodenPickaxe a mc:Tool .\n\nmc:OakLog a mc:Block .",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Subclass Beweis: Abfrage auf neues Turtel File",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element\nWHERE {\n  ?element a mc:Item .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Der Reasoner hat nun die ganzen Subclassen aufgeührt deshalb ist bei der abfrage auf die neue Datei klar das alle Dinge auch Items sind.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# SubProperty Beweis: Abfrage auf altes Turtel File",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n  ?block mc:minedWith ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Hier erhält man nur eine Ouput wenn man nach deim Property mc:minedWith sucht über das Superproperty bleibt die Abfrage leern",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# SubProperty Beweis: Abfrage auf neues Turtel File",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n  ?block mc:requiresInteractionTool ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Hier sieht man nun sehr schön das die Abfrage auf das File nach dem Reasoing nun auch eine Ouput hat wenn man nach dem Superpropery fragt dabei wurde diese Tripple nie geschrrieben",
     "metadata": {}
   }
 ]

@@ -1,0 +1,472 @@
+@prefix : <http://www.minecraft.example/url/2002/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix mc: <http://www.minecraft.example/url/2002/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.minecraft.example/url/2002/> .
+
+<http://www.minecraft.example/url/2002/> rdf:type owl:Ontology ;
+                                          dc:creator "Michael Schüpbach" ;
+                                          dc:date "2026-08-18" ;
+                                          dc:description "Formale RDFS-Ontologie zur semantischen Beschreibung von Gegenständen, Blöcken, Werkzeugen, Herstellungsstationen und Rezepten im Minecraft-Universum."@de ;
+                                          dc:title "Minecraft Item & Crafting Schema"@de ,
+                                                   "Minecraft Item & Crafting Schema"@en ;
+                                          rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                                          rdfs:label "Minecraft Knowledge Graph Ontology"@de ,
+                                                     "Minecraft Knowledge Graph Ontology"@en ;
+                                          rdfs:seeAlso <https://minecraft.wiki/> ;
+                                          owl:versionInfo "2.0 (RDFS Extended)" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/elements/1.1/creator
+dc:creator rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/date
+dc:date rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/description
+dc:description rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/title
+dc:title rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.minecraft.example/url/2002/canMine
+mc:canMine rdf:type owl:ObjectProperty ;
+           owl:inverseOf mc:minedWith .
+
+
+###  http://www.minecraft.example/url/2002/craftedAt
+mc:craftedAt rdf:type owl:ObjectProperty ;
+             rdfs:domain mc:Recipe ;
+             rdfs:range mc:CraftingStation ;
+             rdfs:comment "Gibt die Herstellungsstation an, die zur Ausführung des Rezepts benötigt wird."@de ;
+             rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+             rdfs:label "crafted at"@en ,
+                        "hergestellt an"@de .
+
+
+###  http://www.minecraft.example/url/2002/hasRecipe
+mc:hasRecipe rdf:type owl:ObjectProperty ;
+             rdfs:domain mc:Item ;
+             rdfs:range mc:Recipe ;
+             rdfs:comment "Verknüpft ein herstellbares Item mit dessen zugehörigem Rezept."@de ;
+             rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+             rdfs:label "has recipe"@en ,
+                        "hat Rezept"@de .
+
+
+###  http://www.minecraft.example/url/2002/minedWith
+mc:minedWith rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf mc:requiresInteractionTool ;
+             rdfs:domain mc:Block ;
+             rdfs:range mc:Tool ;
+             rdfs:comment "Bestimmt das Werkzeug, mit dem ein Block in der Welt abgebaut werden kann."@de ;
+             rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+             rdfs:label "abgebaut mit"@de ,
+                        "mined with"@en .
+
+
+###  http://www.minecraft.example/url/2002/requiredItem
+mc:requiredItem rdf:type owl:ObjectProperty ;
+                rdfs:domain mc:IngredientRequirement ;
+                rdfs:range mc:Item ;
+                rdfs:comment "Verweist von einer Zutatenanforderung auf das konkrete benötigte Item."@de ;
+                rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                rdfs:label "benötigter Gegenstand"@de ,
+                           "required item"@en .
+
+
+###  http://www.minecraft.example/url/2002/requiresIngredient
+mc:requiresIngredient rdf:type owl:ObjectProperty ;
+                      rdfs:domain mc:Recipe ;
+                      rdfs:range mc:IngredientRequirement ;
+                      rdfs:comment "Verknüpft ein Rezept mit einem Zutaten-Anforderungsknoten."@de ;
+                      rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                      rdfs:label "benötigt Zutat"@de ,
+                                 "requires ingredient"@en .
+
+
+###  http://www.minecraft.example/url/2002/requiresInteractionTool
+mc:requiresInteractionTool rdf:type owl:ObjectProperty ;
+                           rdfs:domain mc:Item ;
+                           rdfs:range mc:Tool ;
+                           rdfs:comment "Allgemeine Eigenschaft: Gibt an, dass für die Nutzung ein Werkzeug erforderlich ist."@de ;
+                           rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                           rdfs:label "benötigt Interaktionswerkzeug"@de ,
+                                      "requires tool"@en .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.minecraft.example/url/2002/amount
+mc:amount rdf:type owl:DatatypeProperty ;
+          rdfs:domain mc:IngredientRequirement ;
+          rdfs:range rdfs:Literal ;
+          rdfs:comment "Die genaue Anzahl der Einheiten dieses Gegenstands für das Rezept."@de ;
+          rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+          rdfs:label "Menge"@de ,
+                     "amount"@en .
+
+
+###  http://www.minecraft.example/url/2002/hasName
+mc:hasName rdf:type owl:DatatypeProperty ;
+           rdfs:domain mc:Item ;
+           rdfs:range rdfs:Literal ;
+           rdfs:comment "Der menschenlesbare Anzeigename eines Gegenstands oder einer Entität im Spiel."@de ;
+           rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+           rdfs:label "has name"@en ,
+                      "hat Name"@de .
+
+
+###  http://www.minecraft.example/url/2002/yields
+mc:yields rdf:type owl:DatatypeProperty ;
+          rdfs:domain mc:Recipe ;
+          rdfs:range rdfs:Literal ;
+          rdfs:comment "Die Stückzahl des Ziel-Items, die bei erfolgreicher Herstellung entsteht."@de ;
+          rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+          rdfs:label "ergibt Ausbeute"@de ,
+                     "yields count"@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.minecraft.example/url/2002/Block
+mc:Block rdf:type owl:Class ;
+         rdfs:subClassOf mc:Item ;
+         rdfs:comment "Ein Gegenstand, der als 3D-Block in der Spielwelt platziert oder abgebaut werden kann."@de ;
+         rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+         rdfs:label "Block"@de ,
+                    "Block"@en .
+
+
+###  http://www.minecraft.example/url/2002/CraftingStation
+mc:CraftingStation rdf:type owl:Class ;
+                   rdfs:subClassOf mc:Block ;
+                   rdfs:comment "Ein Block oder Ort, an dem Rezepte ausgeführt werden können (z. B. Werkbank, Ofen)."@de ;
+                   rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                   rdfs:label "Crafting Station"@en ,
+                              "Herstellungsstation"@de .
+
+
+###  http://www.minecraft.example/url/2002/IngredientRequirement
+mc:IngredientRequirement rdf:type owl:Class ;
+                         rdfs:subClassOf rdfs:Resource ;
+                         rdfs:comment "Repräsentiert die Kombination aus einem benötigten Item und der Stückzahl im Rezept."@de ;
+                         rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+                         rdfs:label "Ingredient Requirement"@en ,
+                                    "Zutatenanforderung"@de .
+
+
+###  http://www.minecraft.example/url/2002/Item
+mc:Item rdf:type owl:Class ;
+        rdfs:subClassOf rdfs:Resource ;
+        rdfs:comment "Oberklasse für alle sammelbaren, nutzbaren oder platzierbaren Entitäten im Spiel."@de ;
+        rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+        rdfs:label "Gegenstand"@de ,
+                   "Item"@en .
+
+
+###  http://www.minecraft.example/url/2002/Material
+mc:Material rdf:type owl:Class ;
+            rdfs:subClassOf mc:Item ;
+            rdfs:comment "Grundlegende Rohstoffe oder Zwischenprodukte (z. B. Stock, Diamant, Eisenbarren)."@de ;
+            rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+            rdfs:label "Material"@de ,
+                       "Material"@en .
+
+
+###  http://www.minecraft.example/url/2002/Recipe
+mc:Recipe rdf:type owl:Class ;
+          rdfs:subClassOf rdfs:Resource ;
+          rdfs:comment "Eine Herstellungsanleitung, die Zutaten und eine Station zu einem Ergebnis verknüpft."@de ;
+          rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+          rdfs:label "Recipe"@en ,
+                     "Rezept"@de .
+
+
+###  http://www.minecraft.example/url/2002/Tool
+mc:Tool rdf:type owl:Class ;
+        rdfs:subClassOf mc:Item ;
+        rdfs:comment "Ein Ausrüstungsgegenstand zur Umweltinteraktion (z. B. Spitzhacke, Axt)."@de ;
+        rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
+        rdfs:label "Tool"@en ,
+                   "Werkzeug"@de .
+
+
+###  http://www.w3.org/2000/01/rdf-schema#Resource
+rdfs:Resource rdf:type owl:Class ;
+              rdfs:subClassOf owl:Thing .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.minecraft.example/url/2002/Cobblestone
+mc:Cobblestone rdf:type owl:NamedIndividual ,
+                        mc:Block ,
+                        mc:Item ,
+                        rdfs:Resource ,
+                        owl:Thing ;
+               mc:minedWith mc:WoodenPickaxe ;
+               mc:requiresInteractionTool mc:WoodenPickaxe ;
+               mc:hasName "Bruchstein"@de ,
+                          "Cobblestone"@en .
+
+
+###  http://www.minecraft.example/url/2002/Craftingtable
+mc:Craftingtable rdf:type owl:NamedIndividual ,
+                          mc:Block ,
+                          mc:CraftingStation ,
+                          mc:Item ,
+                          rdfs:Resource ,
+                          owl:Thing ;
+                 mc:hasRecipe _:genid1 ;
+                 mc:hasName "Crafting Table"@en ,
+                            "Werkbank"@de .
+
+_:genid1 rdf:type mc:Recipe ;
+          mc:requiresIngredient _:genid2 ;
+          mc:yields 1 .
+
+_:genid2 rdf:type mc:IngredientRequirement ;
+          mc:requiredItem mc:OakPlanks ;
+          mc:amount 4 .
+
+
+###  http://www.minecraft.example/url/2002/Diamond
+mc:Diamond rdf:type owl:NamedIndividual ,
+                    mc:Block ,
+                    mc:Item ,
+                    mc:Material ,
+                    rdfs:Resource ,
+                    owl:Thing ;
+           mc:minedWith mc:IronPickaxe ;
+           mc:requiresInteractionTool mc:IronPickaxe ;
+           mc:hasName "Diamant"@de ,
+                      "Diamond"@en .
+
+
+###  http://www.minecraft.example/url/2002/DiamondPickaxe
+mc:DiamondPickaxe rdf:type owl:NamedIndividual ,
+                           mc:Item ,
+                           mc:Tool ,
+                           rdfs:Resource ,
+                           owl:Thing ;
+                  mc:hasRecipe _:genid3 ;
+                  mc:hasName "Diamantspitzhacke"@de ,
+                             "Diamond Pickaxe"@en .
+
+_:genid3 rdf:type mc:Recipe ;
+          mc:craftedAt mc:Craftingtable ;
+          mc:requiresIngredient _:genid4 ,
+                                _:genid5 ;
+          mc:yields 1 .
+
+_:genid4 rdf:type mc:IngredientRequirement ;
+          mc:requiredItem mc:Diamond ;
+          mc:amount 3 .
+
+_:genid5 rdf:type mc:IngredientRequirement ;
+          mc:requiredItem mc:Stick ;
+          mc:amount 2 .
+
+
+###  http://www.minecraft.example/url/2002/Furnace
+mc:Furnace rdf:type owl:NamedIndividual ,
+                    mc:Block ,
+                    mc:CraftingStation ,
+                    mc:Item ,
+                    rdfs:Resource ,
+                    owl:Thing ;
+           mc:hasRecipe _:genid6 ;
+           mc:hasName "Furnace"@en ,
+                      "Ofen"@de .
+
+_:genid6 rdf:type mc:Recipe ;
+          mc:craftedAt mc:Craftingtable ;
+          mc:requiresIngredient _:genid7 ;
+          mc:yields 1 .
+
+_:genid7 rdf:type mc:IngredientRequirement ;
+          mc:requiredItem mc:Cobblestone ;
+          mc:amount 8 .
+
+
+###  http://www.minecraft.example/url/2002/IronIngot
+mc:IronIngot rdf:type owl:NamedIndividual ,
+                      mc:Item ,
+                      mc:Material ,
+                      rdfs:Resource ,
+                      owl:Thing ;
+             mc:hasRecipe _:genid8 ;
+             mc:hasName "Eisenbarren"@de ,
+                        "Iron Ingot"@en .
+
+_:genid8 rdf:type mc:Recipe ;
+          mc:craftedAt mc:Furnace ;
+          mc:requiresIngredient _:genid9 ;
+          mc:yields 1 .
+
+_:genid9 rdf:type mc:IngredientRequirement ;
+          mc:requiredItem mc:IronOre ;
+          mc:amount 1 .
+
+
+###  http://www.minecraft.example/url/2002/IronOre
+mc:IronOre rdf:type owl:NamedIndividual ,
+                    mc:Block ,
+                    mc:Item ,
+                    rdfs:Resource ,
+                    owl:Thing ;
+           mc:minedWith mc:StonePickaxe ;
+           mc:requiresInteractionTool mc:StonePickaxe ;
+           mc:hasName "Eisenerz"@de ,
+                      "Iron Ore"@en .
+
+
+###  http://www.minecraft.example/url/2002/IronPickaxe
+mc:IronPickaxe rdf:type owl:NamedIndividual ,
+                        mc:Item ,
+                        mc:Tool ,
+                        rdfs:Resource ,
+                        owl:Thing ;
+               mc:canMine mc:Diamond ;
+               mc:hasRecipe _:genid10 ;
+               mc:hasName "Eisenspitzhacke"@de ,
+                          "Iron Pickaxe"@en .
+
+_:genid10 rdf:type mc:Recipe ;
+           mc:craftedAt mc:Craftingtable ;
+           mc:requiresIngredient _:genid11 ,
+                                 _:genid12 ;
+           mc:yields 1 .
+
+_:genid11 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:IronIngot ;
+           mc:amount 3 .
+
+_:genid12 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:Stick ;
+           mc:amount 2 .
+
+
+###  http://www.minecraft.example/url/2002/OakLog
+mc:OakLog rdf:type owl:NamedIndividual ,
+                   mc:Block ,
+                   mc:Item ,
+                   rdfs:Resource ,
+                   owl:Thing ;
+          mc:hasName "Eichenstamm"@de ,
+                     "Oak Log"@en .
+
+
+###  http://www.minecraft.example/url/2002/OakPlanks
+mc:OakPlanks rdf:type owl:NamedIndividual ,
+                      mc:Block ,
+                      mc:Item ,
+                      rdfs:Resource ,
+                      owl:Thing ;
+             mc:hasRecipe _:genid13 ;
+             mc:hasName "Eichenholzbretter"@de ,
+                        "Oak Planks"@en .
+
+_:genid13 rdf:type mc:Recipe ;
+           mc:requiresIngredient _:genid14 ;
+           mc:yields 4 .
+
+_:genid14 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:OakLog ;
+           mc:amount 1 .
+
+
+###  http://www.minecraft.example/url/2002/Stick
+mc:Stick rdf:type owl:NamedIndividual ,
+                  mc:Item ,
+                  mc:Material ,
+                  rdfs:Resource ,
+                  owl:Thing ;
+         mc:hasRecipe _:genid15 ;
+         mc:hasName "Stick"@en ,
+                    "Stock"@de .
+
+_:genid15 rdf:type mc:Recipe ;
+           mc:requiresIngredient _:genid16 ;
+           mc:yields 4 .
+
+_:genid16 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:OakPlanks ;
+           mc:amount 2 .
+
+
+###  http://www.minecraft.example/url/2002/StonePickaxe
+mc:StonePickaxe rdf:type owl:NamedIndividual ,
+                         mc:Item ,
+                         mc:Tool ,
+                         rdfs:Resource ,
+                         owl:Thing ;
+                mc:canMine mc:IronOre ;
+                mc:hasRecipe _:genid17 ;
+                mc:hasName "Steinspitzhacke"@de ,
+                           "Stone Pickaxe"@en .
+
+_:genid17 rdf:type mc:Recipe ;
+           mc:craftedAt mc:Craftingtable ;
+           mc:requiresIngredient _:genid18 ,
+                                 _:genid19 ;
+           mc:yields 1 .
+
+_:genid18 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:Cobblestone ;
+           mc:amount 3 .
+
+_:genid19 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:Stick ;
+           mc:amount 2 .
+
+
+###  http://www.minecraft.example/url/2002/WoodenPickaxe
+mc:WoodenPickaxe rdf:type owl:NamedIndividual ,
+                          mc:Item ,
+                          mc:Tool ,
+                          rdfs:Resource ,
+                          owl:Thing ;
+                 mc:canMine mc:Cobblestone ;
+                 mc:hasRecipe _:genid20 ;
+                 mc:hasName "Holzspitzhacke"@de ,
+                            "Wooden Pickaxe"@en .
+
+_:genid20 rdf:type mc:Recipe ;
+           mc:craftedAt mc:Craftingtable ;
+           mc:requiresIngredient _:genid21 ,
+                                 _:genid22 ;
+           mc:yields 1 .
+
+_:genid21 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:OakPlanks ;
+           mc:amount 3 .
+
+_:genid22 rdf:type mc:IngredientRequirement ;
+           mc:requiredItem mc:Stick ;
+           mc:amount 2 .
+
+
+###  Generated by the OWL API (version 4.5.29) https://github.com/owlcs/owlapi

@@ -16,7 +16,7 @@
     rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> ;
     rdfs:seeAlso <https://minecraft.wiki/> .
 
-mc:minedWith owl:inversOf mc:canMine .
+mc:minedWith owl:inverseOf mc:canMine .
 
 # neu KLASSEN-HIERARCHIE (Taxonomie)
 
