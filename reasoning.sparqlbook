@@ -124,5 +124,29 @@
     "language": "markdown",
     "value": "Hier sieht man nun sehr schön das die Abfrage auf das File nach dem Reasoing nun auch eine Ouput hat wenn man nach dem Superpropery fragt dabei wurde diese Tripple nie geschrrieben",
     "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# olw: inverseOf Beweis: Abfrage auf altes Turtle File",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?block\nWHERE {\n    ?werkzeug mc:canMine ?block .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# olw: inverseOf Beweis: Abfrage auf neues Turtle File",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?block\nWHERE {\n    ?werkzeug mc:canMine ?block .\n}\nORDER BY ?werkzeug",
+    "metadata": {}
   }
 ]
