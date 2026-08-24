@@ -62,6 +62,12 @@ mc:CraftingStation a rdfs:Class ;
     rdfs:subClassOf mc:Block ;
     rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
 
+mc:Workstation a owl:Class ;
+    rdfs:label "Arbeitsstation"@de, "Workstation"@en ;
+    rdfs:comment "Synonyme Klasse zu CraftingStation zur Angleichung externer Vokabulare."@de ;
+    owl:equivalentClass mc:CraftingStation ;
+    rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
+
 
 # EIGENSCHAFTEN-TERMINOLOGIE (T-Box / Properties)
 # 1. Namen & Beschreibungen (Datentyp-Eigenschaften -> Range: Literal)
@@ -82,9 +88,9 @@ mc:hasRecipe a rdf:Property ;
     rdfs:range mc:Recipe ;
     rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
 
-mc:craftedAt a rdf:Property ;
+
+mc:craftedAt a owl:ObjectProperty, owl:FunctionalProperty ;
     rdfs:label "hergestellt an"@de, "crafted at"@en ;
-    rdfs:comment "Gibt die Herstellungsstation an, die zur Ausführung des Rezepts benötigt wird."@de ;
     rdfs:domain mc:Recipe ;
     rdfs:range mc:CraftingStation ;
     rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
@@ -134,6 +140,28 @@ mc:minedWith a rdf:Property ;
     rdfs:subPropertyOf mc:requiresInteractionTool ;
     rdfs:label "abgebaut mit"@de, "mined with"@en ;
     rdfs:comment "Bestimmt das Werkzeug, mit dem ein Block in der Welt abgebaut werden kann."@de ;
+    rdfs:domain mc:Block ;
+    rdfs:range mc:Tool ;
+    rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
+
+mc:isAdjacentTo a owl:ObjectProperty, owl:SymmetricProperty ;
+    rdfs:label "grenzt an"@de, "is adjacent to"@en ;
+    rdfs:comment "Gibt eine symmetrische Nachbarschaftsbeziehung zwischen platzierten Blöcken an."@de ;
+    rdfs:domain mc:Block ;
+    rdfs:range mc:Block ;
+    rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
+
+mc:unlocksTierOf a owl:ObjectProperty, owl:TransitiveProperty ;
+    rdfs:label "schaltet Stufe frei"@de, "unlocks tier of"@en ;
+    rdfs:comment "Gibt eine transitive Progressionsstufe zwischen Werkzeugen an."@de ;
+    rdfs:domain mc:Tool ;
+    rdfs:range mc:Tool ;
+    rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
+
+mc:harvestedWith a owl:ObjectProperty ;
+    rdfs:label "geerntet mit"@de, "harvested with"@en ;
+    rdfs:comment "Äquivalente Eigenschaft zu minedWith zur Harmonisierung alternativer Vokabulare."@de ;
+    owl:equivalentProperty mc:minedWith ;
     rdfs:domain mc:Block ;
     rdfs:range mc:Tool ;
     rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
@@ -244,7 +272,7 @@ mc:IronIngot a mc:Material ;
     mc:hasRecipe [
         a mc:Recipe ;
         mc:yields 1 ;
-        mc:craftedAt mc:Furnace ;
+        mc:craftedAt mc:Furnace , mc:SmeltingFurnace ;
         mc:requiresIngredient [
             a mc:IngredientRequirement ;
             mc:requiredItem mc:IronOre ;
@@ -286,3 +314,12 @@ mc:DiamondPickaxe a mc:Tool ;
         ]
     ] .
 
+mc:Furnace mc:isAdjacentTo mc:Craftingtable .
+
+# Werkzeug-Progression (Transitive Kette)
+mc:WoodenPickaxe mc:unlocksTierOf mc:StonePickaxe .
+mc:StonePickaxe mc:unlocksTierOf mc:IronPickaxe .
+mc:IronPickaxe mc:unlocksTierOf mc:DiamondPickaxe .
+
+# sameAs
+mc:WorkBench owl:sameAs mc:Craftingtable .
