@@ -1,0 +1,254 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# ⛏️ Semantic Web Inferenz & Reasoning (RDFS & OWL)\n\n**Autor:** Michael Schüpbach  \n**Jira-Story**  B3-579\n\n---\n\n### 🎯 Ziel dieses Notebooks\nDieses Notebook dokumentiert und beweist die Funktionsweise semantischer Inferenzregeln anhand unseres **Minecraft-Wissensgraphen**.\n\nFür jedes Regelkonstrukt aus der Jira-Story zeigen wir:\n1. **Theorie & Bedeutung** in eigenen Worten.\n2. **SPARQL-CONSTRUCT-Query**, welche die Inferenzregel auf den Rohdaten simuliert.\n3. **Vorher-Beweis (`test_minecraft.ttl`)**: Abfrage auf den unvollständigen Rohdaten.\n4. **Nachher-Beweis (`test_minecraft_inferred.ttl`)**: Abfrage nach Ausführung des Reasoners (HermiT / ROBOT).",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 🔬 Methodik: Wie wir semantisches Reasoning untersuchen & beweisen\n\nIn diesem Notebook verlassen wir uns nicht blind auf den Reasoner als „Black Box“, sondern machen die logischen Ableitungen auf zwei Arten transparent und nachvollziehbar:\n\n---\n\n### 1. Inferenz-Simulation mit SPARQL `CONSTRUCT`\nEin Reasoner (wie HermiT) wendet im Hintergrund formale Logikregeln an, um aus vorhandenen Fakten und Schemadefinitionen neues Wissen abzuleiten[cite: 4, 6]. \n\nUm diesen Vorgang sichtbar zu machen, bauen wir für jedes Konstrukt eine eigene **SPARQL-`CONSTRUCT`-Abfrage** auf[cite: 2, 6]:\n* **WHERE-Muster:** Sucht nach bestehenden Fakten und den dazugehörigen Schemaregeln in den Rohdaten[cite: 2, 6].\n* **`FILTER NOT EXISTS`:** Schließt Tripel aus, die bereits in den Daten stehen[cite: 2, 6]. So filtern wir Redundanz heraus und isolieren exakt das implizite, neu erzeugte Wissen[cite: 6, 8].\n* **CONSTRUCT-Block:** Generiert genau die neuen RDF-Tripel, die ein Reasoner materialisieren würde[cite: 2, 6].\n\n---\n\n### 2. Der empirische Vorher-Nachher-Beweis\nUm zu beweisen, dass implizites Wissen ohne Reasoner unsichtbar bleibt und erst durch Inferenz abfragbar wird, führen wir bei jedem Thema denselben Test durch:\n\n```text\n┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐\n│       1. VORHER (Rohdaten)           │     │      2. NACHHER (Inferenz-Graph)     │\n│       [test_minecraft.ttl]           │     │   [test_minecraft_inferred.ttl]      │\n│                                      │     │                                      │\n│ • Reiner Musterabgleich              │     │ • Durch HermiT/ROBOT berechnet       │\n│ • Ergebnis: 0 Zeilen (leer!)         │     │ • Ergebnis: Alle Fakten sichtbar     │\n└──────────────────────────────────────┘     └──────────────────────────────────────┘",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. rdfs:subClassOf – Klassenhierarchie und Vererbung\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:subClassOf` verbindet zwei Klassen auf der Schema-Ebene (T-Box). Es drückt eine Vererbungsbeziehung aus: Jedes Element einer Unterklasse ist logisch automatisch auch ein Element der übergeordneten Klasse.\n* **Unterschied zu `rdf:type` (`a`):**  \n  `rdf:type` verbindet ein konkretes Individuum mit einer Klasse (Instanz-Ebene, z. B. `mc:OakLog a mc:Block`). `rdfs:subClassOf` verbindet zwei Konzepte miteinander (Schema-Ebene, z. B. `mc:Block rdfs:subClassOf mc:Item`).\n* **Minecraft-Beispiel:**  \n  In unseren Rohdaten ist `mc:OakLog` nur als `mc:Block` typisiert. Weil im Schema `mc:Block rdfs:subClassOf mc:Item` definiert ist, leitet das System automatisch ab, dass der Eichenstamm auch ein `mc:Item` ist – ohne dass wir dieses Tripel jemals explizit tippen mussten.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\n\nCONSTRUCT {                                      #Hier defineiren wir was wir gebaut haben möchten vom Construct, Wir wollen die Triples der Ressourcen und der dazu vergebene Oberklasse\n    ?instanz a ?oberklasse .\n}\nWHERE {\n    ?instanz a ?unterklasse .                     # Finde jedes Individuum (?instanz) und die hinterlegte Klasse (?unterklasse)\n    ?unterklasse rdfs:subClassOf ?oberklasse .      # Prüfe in der Ontologie, ob die Klasse eine übergeordnete Klasse (?oberklasse) besitzt\n    FILTER NOT EXISTS {                         \n        ?instanz a ?oberklasse .                # Behält nur die Treffer, bei denen die Beziehung im Graphen noch NICHT explizit existiert\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Suche nach 'Item' in den Rohdaten (Ergebnis bleibt leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Nach dem Reasoning sind Blöcke und Werkzeuge automatisch Items\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}\nORDER BY ?Item",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. rdfs:subPropertyOf – Eigenschaften-Hierarchie\n\n* **Was bedeutet das Konstrukt?**  \n  Properties sind in RDF eigenständige Objekte (`rdf:Property`). Mit `rdfs:subPropertyOf` können Beziehungen hierarchisch spezialisiert werden. \n* **Inferenz-Logik:**  \n  Wann immer zwei Entitäten über eine spezifische Unter-Eigenschaft verknüpft sind, gilt logisch automatisch auch die allgemeinere Ober-Eigenschaft.\n* **Minecraft-Beispiel:**  \n  `mc:minedWith` ist eine Untereigenschaft von `mc:requiresInteractionTool`. Wenn in den Daten steht, dass Bruchstein mit einer Holzspitzhacke abgebaut wird, leitet der Reasoner automatisch ab, dass Bruchstein generell ein Werkzeug zur Interaktion benötigt.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX : <http://www.minecraft.example/url/2002/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    # Erzeuge die abgeleitete allgemeinere Beziehung\n    ?s ?superProperty ?o .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?subProperty ?o .\n    \n    # 2. Prüfe, ob dafür eine Ober-Eigenschaft im Schema existiert\n    ?subProperty rdfs:subPropertyOf ?superProperty .\n    \n    # 3. Nur ausgeben, falls diese Verbindung noch nicht explizit gespeichert war\n    FILTER NOT EXISTS {\n        ?s ?superProperty ?o .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Suche nach der Ober-Eigenschaft in den Rohdaten (Ergebnis bleibt leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n    ?block mc:requiresInteractionTool ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Nach dem Reasoning existiert die allgemeinere Werkzeug-Beziehung\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n    ?block mc:requiresInteractionTool ?werkzeug .\n}\nORDER BY ?block",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. rdfs:domain – Definitionsbereich (Subjekt-Typisierung)\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:domain` legt fest, zu welcher Klasse das **Subjekt** (der Startpunkt des Pfeils) gehört, wenn eine bestimmte Eigenschaft verwendet wird.\n* **Inferenz statt Fehlermeldung:**  \n  Im Semantic Web ist die Domain kein relationaler Zwang (Constraint), sondern eine logische Schlussfolgerungsregel: Nutzt eine Entität eine Eigenschaft, leitet der Reasoner automatisch ab, dass das Subjekt eine Instanz der Domain-Klasse ist.\n* **Inferenz-Simulation via CONSTRUCT:**  \n  Die folgende Abfrage simuliert die RDFS-Regel 2: Sie durchsucht alle Tripel und erzeugt für jedes Subjekt die entsprechende Domain-Klassenzugehörigkeit, falls diese noch nicht explizit im Graphen deklariert war.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?s a ?domainKlasse .            # Hier defineiren wir was wir gebaut haben möchten vom Construct\n}\nWHERE {\n    ?s ?p ?o .                      # Hier die Struktur das wir uns alle Tripples anschauen möchten Subjekt -> Objekt -> Prädikat\n    \n    ?p rdfs:domain ?domainKlasse .\n    \n    FILTER NOT EXISTS {\n        ?s a ?domainKlasse .            # Nur ableiten, wenn das Subjekt diesen Typ noch NICHT explizit besitzt\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. rdfs:range – Wertebereich (Objekt-Typisierung)\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:range` bestimmt, zu welcher Klasse oder welchem Datentyp das **Objekt** (das Ziel des Pfeils) gehört.\n* **Inferenz-Logik:**  \n  Zeigt eine Eigenschaft auf eine Ressource, schlussfolgert der Reasoner automatisch, dass dieses Zielobjekt zur im Schema definierten Range-Klasse gehört.\n* **Inferenz-Simulation via CONSTRUCT:**  \n  Die folgende Abfrage simuliert die RDFS-Regel 3: Sie prüft das Ziel jeder Verbindung und typisiert das Objekt anhand der Range der genutzten Eigenschaft (unter Ausschluss von Literalen).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .                                  # Findet ein Tripel in den Daten\n    \n    ?p rdfs:range ?rangeKlasse .                # Prüfe in der Ontologie, ob für dieses Prädikat eine Range-Klasse definiert ist\n    \n    FILTER(isIRI(?o) || isBlank(?o))            # Wichtig: Nur Ressourcen/Knoten prüfen (Literale wie Texte oder Zahlen bekommen kein 'a')\n    \n    FILTER NOT EXISTS {                         #  Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. owl:inverseOf – Inverse Eigenschaften (Umkehr-Beziehungen)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:inverseOf` drückt aus, dass zwei Eigenschaften spiegelbildlich zueinander stehen. Wenn eine Beziehung von $A \\rightarrow B$ gilt, schlussfolgert das System automatisch die Gegenrichtung von $B \\rightarrow A$.\n* **Praktischer Nutzen:**  \n  Beziehungen müssen im Datenbestand nur in **eine Richtung** manuell gepflegt werden. Die entgegengesetzte Leserichtung erzeugt der Reasoner redundantfrei zur Laufzeit.\n* **Minecraft-Beispiel:**  \n  In den Rohdaten ist nur hinterlegt, welcher Block mit welchem Werkzeug abgebaut wird (`mc:minedWith`, z. B. `mc:Cobblestone` $\\rightarrow$ `mc:WoodenPickaxe`). Durch die Definition `mc:canMine owl:inverseOf mc:minedWith` leitet der Reasoner automatisch ab, welche Werkzeuge welche Blöcke abbauen können (`mc:WoodenPickaxe` $\\rightarrow$ `mc:Cobblestone`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Umkehrung inverser Eigenschaften (owl:inverseOf)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Drehe Subjekt und Objekt für die inverse Eigenschaft um\n    ?o ?invProperty ?s .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?property ?o .\n    \n    # 2. Prüfe im Schema, ob eine inverse Eigenschaft deklariert ist (beidseitig prüfbar)\n    { ?property owl:inverseOf ?invProperty . }\n    UNION\n    { ?invProperty owl:inverseOf ?property . }\n    \n    # 3. Nur ausgeben, falls diese inverse Verbindung noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?o ?invProperty ?s .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Suche nach mc:canMine auf Rohdaten (Ergebnis bleibt 0 Zeilen / leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?block\nWHERE {\n    ?werkzeug mc:canMine ?block .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Reasoner hat alle inversen mc:canMine-Kanten materialisiert\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?werkzeug ?block\nWHERE {\n    ?werkzeug mc:canMine ?block .\n}\nORDER BY ?werkzeug",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. owl:SymmetricProperty – Symmetrische Eigenschaften\n\n* **Was bedeutet das Konstrukt?**  \n  Eine Eigenschaft ist symmetrisch, wenn die Beziehung richtungsunabhängig gilt. Wenn gilt $A \\xrightarrow{P} B$, leitet das System automatisch $B \\xrightarrow{P} A$ unter demselben Prädikat ab.\n* **Unterschied zu `owl:inverseOf`:**  \n  Bei `owl:inverseOf` gibt es zwei unterschiedliche Prädikate (`minedWith` $\\leftrightarrow$ `canMine`). Eine `owl:SymmetricProperty` ist ihre eigene Umkehrung.\n* **Minecraft-Beispiel:**  \n  Block-Nachbarschaft (`mc:isAdjacentTo`). Der Ofen wird neben die Werkbank platziert (`mc:Furnace mc:isAdjacentTo mc:Craftingtable`). Der Reasoner schlussfolgert automatisch: `mc:Craftingtable mc:isAdjacentTo mc:Furnace`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Symmetrische Beziehungen spiegeln\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    ?o ?p ?s .\n}\nWHERE {\n    ?s ?p ?o .\n    ?p a owl:SymmetricProperty .\n    FILTER NOT EXISTS {\n        ?o ?p ?s .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Welche Stationen grenzen an die Werkbank? (0 Zeilen / leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Reasoner hat mc:Furnace als Nachbar abgeleitet\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. owl:TransitiveProperty – Transitive Eigenschaften (Werkzeug-Progression)\n\n* **Was bedeutet das Konstrukt?**  \n  Eine Eigenschaft ist transitiv, wenn sich eine Kette von Beziehungen logisch über Zwischenglieder fortsetzt: Wenn $A \\xrightarrow{P} B$ und $B \\xrightarrow{P} C$ gelten, leitet das System automatisch die Direktverbindung $A \\xrightarrow{P} C$ ab.\n* **Praktischer Nutzen:**  \n  Hierarchien, Prozessketten und Technologie-Bäume müssen nur als direkte Nachbarschritte modelliert werden. Die übergeordneten Gesamtzusammenhänge erschließt der Reasoner automatisch.\n* **Minecraft-Beispiel:**  \n  Werkzeug-Progression (`mc:unlocksTierOf`). Die Holzspitzhacke ermöglicht den Bau der Steinspitzhacke (`mc:WoodenPickaxe mc:unlocksTierOf mc:StonePickaxe`), diese ermöglicht die Eisenspitzhacke und jene die Diamantspitzhacke. Der Reasoner schlussfolgert automatisch, dass die Holzspitzhacke transitiv den Weg bis zur Diamantspitzhacke freischaltet (`mc:WoodenPickaxe mc:unlocksTierOf mc:DiamondPickaxe`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Transitive Kettenschlüsse ableiten (owl:TransitiveProperty)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    ?a ?p ?c .\n}\nWHERE {\n    # 1. Prüfe, ob die Eigenschaft als transitiv deklariert ist\n    ?p a owl:TransitiveProperty .\n    \n    # 2. Finde eine Kette über ein Zwischenglied: A -> B und B -> C\n    ?a ?p ?b .\n    ?b ?p ?c .\n    \n    # 3. Nur ausgeben, falls die Verbindung noch nicht explizit in den Rohdaten steht\n    FILTER NOT EXISTS {\n        ?a ?p ?c .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zielwerkzeug\nWHERE {\n    mc:WoodenPickaxe mc:unlocksTierOf ?zielwerkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?zielwerkzeug\nWHERE {\n    mc:WoodenPickaxe mc:unlocksTierOf ?zielwerkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 10. owl:sameAs – Identität von Ressourcen (Alias & Datenintegration)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:sameAs` verbindet zwei unterschiedliche URIs und deklariert, dass beide dasselbe reale Individuum in der Welt repräsentieren.\n* **Inferenz-Mechanismus:**  \n  Gilt $A\\ \\text{owl:sameAs}\\ B$, leitet der Reasoner ab, dass alle Eigenschaften, Typen und Relationen von $A$ auch für $B$ gelten und umgekehrt.\n* **Minecraft-Beispiel:**  \n  Synonyme Bezeichnung (`mc:WorkBench owl:sameAs mc:Craftingtable`). Der Alias `mc:WorkBench` besitzt in den Rohdaten keinerlei Attribute. Durch `owl:sameAs` schlussfolgert das System automatisch alle Namen, Rezepte und Nachbarschaften der Werkbank auch für `mc:WorkBench`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Fakten-Übertragung bei identischen Ressourcen (owl:sameAs)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Übertrage alle Eigenschaften des Originals auf den Alias\n    ?alias ?p ?o .\n}\nWHERE {\n    # 1. Finde Individuen, die als identisch deklariert wurden (in beide Richtungen)\n    { ?original owl:sameAs ?alias . }\n    UNION\n    { ?alias owl:sameAs ?original . }\n    \n    # 2. Hole alle Eigenschaften des Originals ab\n    ?original ?p ?o .\n    \n    # 3. owl:sameAs selbst nicht als Eigenschaft duplizieren\n    FILTER(?p != owl:sameAs)\n    \n    # 4. Nur übertragen, falls die Information am Alias noch nicht existiert\n    FILTER NOT EXISTS {\n        ?alias ?p ?o .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Welche Namen besitzt der Alias mc:WorkBench? (0 Zeilen / leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?name\nWHERE {\n    mc:WorkBench mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Reasoner hat alle Namen von mc:Craftingtable auf mc:WorkBench übertragen\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?name\nWHERE {\n    mc:WorkBench mc:hasName ?name .\n}\nORDER BY ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 11. owl:equivalentClass – Äquivalenz von Klassen (Schema-Angleichung)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:equivalentClass` definiert, dass zwei Klassen exakt denselben Bedeutungsumfang besitzen ($A \\equiv B$). Es handelt sich um eine beidseitige Unterklassen-Beziehung ($A \\sqsubseteq B \\land B \\sqsubseteq A$).\n* **Inferenz-Mechanismus:**  \n  Jedes Individuum, das als Typ $A$ klassifiziert ist, erhält durch den Reasoner automatisch auch den Typ $B$ und umgekehrt.\n* **Minecraft-Beispiel:**  \n  Schema-Harmonisierung (`mc:Workstation owl:equivalentClass mc:CraftingStation`). In den Rohdaten sind Werkbank (`mc:Craftingtable`) und Ofen (`mc:Furnace`) nur als `mc:CraftingStation` deklariert. Der Reasoner leitet automatisch ab, dass beide Blöcke auch vollwertige Instanzen der Klasse `mc:Workstation` sind.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Typ-Übertragung via owl:equivalentClass\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Erzeuge die neue Typ-Zuweisung für die äquivalente Klasse\n    ?instanz a ?zielKlasse .\n}\nWHERE {\n    # 1. Finde eine Instanz und ihre vorhandene Klasse\n    ?instanz a ?quellKlasse .\n    \n    # 2. Finde eine äquivalente Klasse (in beide Richtungen prüfbar)\n    { ?quellKlasse owl:equivalentClass ?zielKlasse . }\n    UNION\n    { ?zielKlasse owl:equivalentClass ?quellKlasse . }\n    \n    # 3. Triviale Selbst-Äquivalenz ausschließen\n    FILTER(?quellKlasse != ?zielKlasse)\n    \n    # 4. Nur generieren, falls die Instanz diesen Typ noch nicht explizit besitzt\n    FILTER NOT EXISTS {\n        ?instanz a ?zielKlasse .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?station\nWHERE {\n    ?station a mc:Workstation .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?station\nWHERE {\n    ?station a mc:Workstation .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 12. owl:equivalentProperty – Äquivalenz von Eigenschaften (Prädikats-Harmonisierung)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:equivalentProperty` deklariert zwei Eigenschaften als semantisch identisch ($P_1 \\equiv P_2$). Es entspricht einer beidseitigen Subproperty-Beziehung ($P_1 \\sqsubseteq P_2 \\land P_2 \\sqsubseteq P_1$).\n* **Inferenz-Mechanismus:**  \n  Existiert ein Tripel $S \\xrightarrow{P_1} O$, leitet das System automatisch auch das Tripel $S \\xrightarrow{P_2} O$ ab.\n* **Minecraft-Beispiel:**  \n  Vokabular-Angleichung (`mc:harvestedWith owl:equivalentProperty mc:minedWith`). In den Rohdaten wurde bei Blöcken nur `mc:minedWith` hinterlegt. Durch die Äquivalenz erzeugt der Reasoner für alle Abbau-Beziehungen automatisch auch die Relation `mc:harvestedWith`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Übertragung äquivalenter Eigenschaften (owl:equivalentProperty)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Erzeuge die Relation unter dem äquivalenten Prädikat\n    ?s ?zielProperty ?o .\n}\nWHERE {\n    # 1. Finde ein bestehendes Tripel in den Daten\n    ?s ?quellProperty ?o .\n    \n    # 2. Prüfe, ob eine äquivalente Eigenschaft deklariert ist (in beide Richtungen)\n    { ?quellProperty owl:equivalentProperty ?zielProperty . }\n    UNION\n    { ?zielProperty owl:equivalentProperty ?quellProperty . }\n    \n    # 3. Triviale Selbst-Äquivalenz ausschließen\n    FILTER(?quellProperty != ?zielProperty)\n    \n    # 4. Nur generieren, falls diese Eigenschaft beim Subjekt noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?s ?zielProperty ?o .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n    ?block mc:harvestedWith ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?block ?werkzeug\nWHERE {\n    ?block mc:harvestedWith ?werkzeug .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 13. owl:FunctionalProperty – Funktionale Eigenschaften (Ableitung von Identitäten)\n\n* **Was bedeutet das Konstrukt?**  \n  Eine funktionale Eigenschaft definiert eine eindeutige Zuordnung ($n \\to 1$): Ein Subjekt darf für dieses Prädikat maximal ein einziges logisches Zielobjekt besitzen.\n* **Inferenz-Mechanismus (Semantic Web Logik):**  \n  Werden für dasselbe Subjekt zwei unterschiedliche Bezeichner angegeben ($S \\xrightarrow{P} O_1$ und $S \\xrightarrow{P} O_2$), leitet der Reasoner ab, dass beide Bezeichner dieselbe reale Entität meinen. Er überträgt alle bekannten Attribute, Namen und Relationen von $O_1$ automatisch auf $O_2$.\n* **Minecraft-Beispiel:**  \n  Herstellungsort (`mc:craftedAt`). Ein Rezept ist eindeutig an genau eine Station gebunden. Da das Eisenbarren-Rezept sowohl mit `mc:Furnace` als auch mit dem sonst leeren Bezeichner `mc:SmeltingFurnace` verknüpft ist, überträgt der Reasoner alle Namen und Eigenschaften des Ofens automatisch auf `mc:SmeltingFurnace`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Identitätsableitung bei funktionalen Eigenschaften (owl:FunctionalProperty)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Erzeuge sameAs zwischen den beiden Objekten\n    ?station1 owl:sameAs ?station2 .\n}\nWHERE {\n    # 1. Ermittle alle als funktional deklarierten Eigenschaften im Schema\n    ?p a owl:FunctionalProperty .\n    \n    # 2. Finde ein Subjekt mit zwei unterschiedlichen Zielobjekten\n    ?rezept ?p ?station1 .\n    ?rezept ?p ?station2 .\n    \n    # 3. Schließe triviale Selbst-Identität aus\n    FILTER(?station1 != ?station2)\n    \n    # 4. Nur generieren, falls die Identität noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?station1 owl:sameAs ?station2 .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?station ?name\nWHERE {\n    VALUES ?station { mc:SmeltingFurnace }\n    ?station mc:hasName ?name .\n} ",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?station ?name\nWHERE {\n    VALUES ?station { mc:SmeltingFurnace }\n    ?station mc:hasName ?name .\n} ",
+    "metadata": {}
+  }
+]
