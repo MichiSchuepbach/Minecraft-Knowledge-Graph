@@ -8,13 +8,13 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 🔬 Methodik: Wie wir semantisches Reasoning untersuchen & beweisen\n\nIn diesem Notebook verlassen wir uns nicht blind auf den Reasoner als „Black Box“, sondern machen die logischen Ableitungen auf zwei Arten transparent und nachvollziehbar:\n\n---\n\n### 1. Inferenz-Simulation mit SPARQL `CONSTRUCT`\nEin Reasoner (wie HermiT) wendet im Hintergrund formale Logikregeln an, um aus vorhandenen Fakten und Schemadefinitionen neues Wissen abzuleiten[cite: 4, 6]. \n\nUm diesen Vorgang sichtbar zu machen, bauen wir für jedes Konstrukt eine eigene **SPARQL-`CONSTRUCT`-Abfrage** auf[cite: 2, 6]:\n* **WHERE-Muster:** Sucht nach bestehenden Fakten und den dazugehörigen Schemaregeln in den Rohdaten[cite: 2, 6].\n* **`FILTER NOT EXISTS`:** Schließt Tripel aus, die bereits in den Daten stehen[cite: 2, 6]. So filtern wir Redundanz heraus und isolieren exakt das implizite, neu erzeugte Wissen[cite: 6, 8].\n* **CONSTRUCT-Block:** Generiert genau die neuen RDF-Tripel, die ein Reasoner materialisieren würde[cite: 2, 6].\n\n---\n\n### 2. Der empirische Vorher-Nachher-Beweis\nUm zu beweisen, dass implizites Wissen ohne Reasoner unsichtbar bleibt und erst durch Inferenz abfragbar wird, führen wir bei jedem Thema denselben Test durch:\n\n```text\n┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐\n│       1. VORHER (Rohdaten)           │     │      2. NACHHER (Inferenz-Graph)     │\n│       [test_minecraft.ttl]           │     │   [test_minecraft_inferred.ttl]      │\n│                                      │     │                                      │\n│ • Reiner Musterabgleich              │     │ • Durch HermiT/ROBOT berechnet       │\n│ • Ergebnis: 0 Zeilen (leer!)         │     │ • Ergebnis: Alle Fakten sichtbar     │\n└──────────────────────────────────────┘     └──────────────────────────────────────┘",
+    "value": "## 🔬 Methodik: Wie wir semantisches Reasoning untersuchen & beweisen\n\nIn diesem Notebook verlassen wir uns nicht blind auf den Reasoner als „Black Box“, sondern machen die logischen Ableitungen auf zwei Arten transparent und nachvollziehbar:\n\n---\n\n### 1. Inferenz-Simulation mit SPARQL `CONSTRUCT`\nEin Reasoner (wie HermiT) wendet im Hintergrund formale Logikregeln an, um aus vorhandenen Fakten und Schemadefinitionen neues Wissen abzuleiten. \n\nUm diesen Vorgang sichtbar zu machen, bauen wir für jedes Konstrukt eine eigene **SPARQL-`CONSTRUCT`-Abfrage** auf\n* **WHERE-Muster:** Sucht nach bestehenden Fakten und den dazugehörigen Schemaregeln in den Rohdaten\n* **`FILTER NOT EXISTS`:** Schließt Tripel aus, die bereits in den Daten stehen. So filtern wir Redundanz heraus und isolieren exakt das implizite, neu erzeugte Wissen.\n* **CONSTRUCT-Block:** Generiert genau die neuen RDF-Tripel, die ein Reasoner materialisieren würde\n\n---\n\n### 2. Der empirische Vorher-Nachher-Beweis\nUm zu beweisen, dass implizites Wissen ohne Reasoner unsichtbar bleibt und erst durch Inferenz abfragbar wird, führen wir bei jedem Thema denselben Test durch:\n\n```text\n┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐\n│       1. VORHER (Rohdaten)           │     │      2. NACHHER (Inferenz-Graph)     │\n│       [test_minecraft.ttl]           │     │   [test_minecraft_inferred.ttl]      │\n│                                      │     │                                      │\n│ • Reiner Musterabgleich              │     │ • Durch HermiT/ROBOT berechnet       │\n│ • Ergebnis: 0 Zeilen (leer!)         │     │ • Ergebnis: Alle Fakten sichtbar     │\n└──────────────────────────────────────┘     └──────────────────────────────────────┘",
     "metadata": {}
   },
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 3. rdfs:subClassOf – Klassenhierarchie und Vererbung\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:subClassOf` verbindet zwei Klassen auf der Schema-Ebene (T-Box). Es drückt eine Vererbungsbeziehung aus: Jedes Element einer Unterklasse ist logisch automatisch auch ein Element der übergeordneten Klasse.\n* **Unterschied zu `rdf:type` (`a`):**  \n  `rdf:type` verbindet ein konkretes Individuum mit einer Klasse (Instanz-Ebene, z. B. `mc:OakLog a mc:Block`). `rdfs:subClassOf` verbindet zwei Konzepte miteinander (Schema-Ebene, z. B. `mc:Block rdfs:subClassOf mc:Item`).\n* **Minecraft-Beispiel:**  \n  In unseren Rohdaten ist `mc:OakLog` nur als `mc:Block` typisiert. Weil im Schema `mc:Block rdfs:subClassOf mc:Item` definiert ist, leitet das System automatisch ab, dass der Eichenstamm auch ein `mc:Item` ist – ohne dass wir dieses Tripel jemals explizit tippen mussten.",
+    "value": "## 3. rdfs:subClassOf – Klassenhierarchie und Vererbung\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:subClassOf` verbindet zwei Klassen auf der Schema-Ebene. Es drückt eine Vererbungsbeziehung aus: Jedes Element einer Unterklasse ist logisch automatisch auch ein Element der übergeordneten Klasse.\n* **Unterschied zu `rdf:type` (`a`):**  \n  `rdf:type` verbindet ein konkretes Individuum mit einer Klasse (Instanz-Ebene, z. B. `mc:OakLog a mc:Block`). `rdfs:subClassOf` verbindet zwei Konzepte miteinander (Schema-Ebene, z. B. `mc:Block rdfs:subClassOf mc:Item`).\n* **Minecraft-Beispiel:**  \n  In unseren Rohdaten ist `mc:OakLog` nur als `mc:Block` typisiert. Weil im Schema `mc:Block rdfs:subClassOf mc:Item` definiert ist, leitet das System automatisch ab, dass der Eichenstamm auch ein `mc:Item` ist – ohne dass wir dieses Tripel jemals explizit tippen mussten.",
     "metadata": {}
   },
   {
@@ -26,13 +26,13 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Suche nach 'Item' in den Rohdaten (Ergebnis bleibt leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Nach dem Reasoning sind Blöcke und Werkzeuge automatisch Items\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}\nORDER BY ?Item",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?Item\nWHERE {\n    ?Item a mc:Item .\n}\nORDER BY ?Item",
     "metadata": {}
   },
   {
@@ -74,19 +74,19 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 6. rdfs:range – Wertebereich (Objekt-Typisierung)\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:range` bestimmt, zu welcher Klasse oder welchem Datentyp das **Objekt** (das Ziel des Pfeils) gehört.\n* **Inferenz-Logik:**  \n  Zeigt eine Eigenschaft auf eine Ressource, schlussfolgert der Reasoner automatisch, dass dieses Zielobjekt zur im Schema definierten Range-Klasse gehört.\n* **Inferenz-Simulation via CONSTRUCT:**  \n  Die folgende Abfrage simuliert die RDFS-Regel 3: Sie prüft das Ziel jeder Verbindung und typisiert das Objekt anhand der Range der genutzten Eigenschaft (unter Ausschluss von Literalen).",
+    "value": "## 6. rdfs:range – Wertebereich (Objekt-Typisierung)\n\n* **Was bedeutet das Konstrukt?**  \n  `rdfs:range` bestimmt, zu welcher Klasse oder welchem Datentyp das **Objekt** (das Ziel des Pfeils) gehört.\n* **Inferenz-Logik:**  \n  Zeigt eine Eigenschaft auf eine Ressource, schlussfolgert der Reasoner automatisch, dass dieses Zielobjekt zur im Schema definierten Range-Klasse gehört.\n* **Inferenz-Simulation via CONSTRUCT:**  \n  Die folgende Abfrage simuliert die RDFS-Regel: Sie prüft das Ziel jeder Verbindung und typisiert das Objekt anhand der Range der genutzten Eigenschaft (unter Ausschluss von Literalen).",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .                                  # Findet ein Tripel in den Daten\n    \n    ?p rdfs:range ?rangeKlasse .                # Prüfe in der Ontologie, ob für dieses Prädikat eine Range-Klasse definiert ist\n    \n    FILTER(isIRI(?o) || isBlank(?o))            # Wichtig: Nur Ressourcen/Knoten prüfen (Literale wie Texte oder Zahlen bekommen kein 'a')\n    \n    FILTER NOT EXISTS {                         #  Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n    ?o a ?rangeKlasse .\n}\nWHERE {\n    ?s ?p ?o .                                  # Findet ein Tripel in den Daten\n    \n    ?p rdfs:range ?rangeKlasse .                # Prüfe in der Ontologie, ob für dieses Prädikat eine Range-Klasse definiert ist\n    \n    FILTER(isIRI(?o) || isBlank(?o))            # Wichtig: Nur Ressourcen/Knoten prüfen (Literale wie Texte oder Zahlen bekommen kein 'a')\n    \n    FILTER NOT EXISTS {                         # Nur ableiten, wenn das Objekt diesen Typ noch NICHT explizit besitzt\n        ?o a ?rangeKlasse .\n    }\n}",
     "metadata": {}
   },
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## 7. owl:inverseOf – Inverse Eigenschaften (Umkehr-Beziehungen)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:inverseOf` drückt aus, dass zwei Eigenschaften spiegelbildlich zueinander stehen. Wenn eine Beziehung von $A \\rightarrow B$ gilt, schlussfolgert das System automatisch die Gegenrichtung von $B \\rightarrow A$.\n* **Praktischer Nutzen:**  \n  Beziehungen müssen im Datenbestand nur in **eine Richtung** manuell gepflegt werden. Die entgegengesetzte Leserichtung erzeugt der Reasoner redundantfrei zur Laufzeit.\n* **Minecraft-Beispiel:**  \n  In den Rohdaten ist nur hinterlegt, welcher Block mit welchem Werkzeug abgebaut wird (`mc:minedWith`, z. B. `mc:Cobblestone` $\\rightarrow$ `mc:WoodenPickaxe`). Durch die Definition `mc:canMine owl:inverseOf mc:minedWith` leitet der Reasoner automatisch ab, welche Werkzeuge welche Blöcke abbauen können (`mc:WoodenPickaxe` $\\rightarrow$ `mc:Cobblestone`).",
+    "value": "## 7. owl:inverseOf – Inverse Eigenschaften (Umkehr-Beziehungen)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:inverseOf` drückt aus, dass zwei Eigenschaften spiegelbildlich zueinander stehen. Wenn eine Beziehung von $A \\rightarrow B$ gilt, schlussfolgert das System automatisch die Gegenrichtung von $B \\rightarrow A$.\n* **Praktischer Nutzen:**  \n  Beziehungen müssen im Datenbestand nur in **eine Richtung** manuell gepflegt werden. \n* **Minecraft-Beispiel:**  \n  In den Rohdaten ist nur hinterlegt, welcher Block mit welchem Werkzeug abgebaut wird (`mc:minedWith`, z. B. `mc:Cobblestone` $\\rightarrow$ `mc:WoodenPickaxe`). Durch die Definition `mc:canMine owl:inverseOf mc:minedWith` leitet der Reasoner automatisch ab, welche Werkzeuge welche Blöcke abbauen können (`mc:WoodenPickaxe` $\\rightarrow$ `mc:Cobblestone`).",
     "metadata": {}
   },
   {
@@ -122,13 +122,13 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Welche Stationen grenzen an die Werkbank? (0 Zeilen / leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
     "metadata": {}
   },
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Reasoner hat mc:Furnace als Nachbar abgeleitet\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?nachbar\nWHERE {\n    mc:Craftingtable mc:isAdjacentTo ?nachbar .\n}",
     "metadata": {}
   },
   {
@@ -249,6 +249,78 @@
     "kind": 2,
     "language": "sparql",
     "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?station ?name\nWHERE {\n    VALUES ?station { mc:SmeltingFurnace }\n    ?station mc:hasName ?name .\n} ",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 14. owl:InverseFunctionalProperty – Invers-funktionale Eigenschaften (Identifikation durch Schlüssel)\n\n* **Was bedeutet das Konstrukt?**  \n  Eine invers-funktionale Eigenschaft wirkt wie ein **Primärschlüssel (Unique Identifier)**: Ein Zielobjekt darf unter diesem Prädikat zu maximal **einem einzigen Subjekt** gehören ($1 \\to n$ in inverser Leserichtung).\n* **Inferenz-Mechanismus:**  \n  Teilen sich zwei unterschiedliche Subjekte denselben eindeutigen Schlüsselwert ($S_1 \\xrightarrow{P} O \\land S_2 \\xrightarrow{P} O$), leitet der Reasoner automatisch ab, dass beide Subjekte identisch sind ($S_1\\ \\text{owl:sameAs}\\ S_2$), und überträgt alle bekannten Eigenschaften aufeinander.\n* **Minecraft-Beispiel:**  \n  Eindeutiger Item-Code (`mc:hasItemCode`). Sowohl der bekannte Bruchstein (`mc:Cobblestone`) als auch eine externe Ressource (`mc:CustomStone`) besitzen denselben Schlüssel `mc:ID_Cobble_04`. Der Reasoner leitet ab, dass `mc:CustomStone` identisch mit `mc:Cobblestone` ist, und weist `mc:CustomStone` automatisch die Namen des Bruchsteins zu.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Identitätsableitung via owl:InverseFunctionalProperty\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Wenn zwei Subjekte denselben invers-funktionalen Schlüssel teilen, sind sie identisch\n    ?s1 owl:sameAs ?s2 .\n}\nWHERE {\n    # 1. Ermittle alle invers-funktionalen Eigenschaften im Schema\n    ?p a owl:InverseFunctionalProperty .\n    \n    # 2. Finde zwei unterschiedliche Subjekte mit identischem Schlüsselobjekt\n    ?s1 ?p ?schluessel .\n    ?s2 ?p ?schluessel .\n    \n    # 3. Triviale Selbst-Identität ausschließen\n    FILTER(?s1 != ?s2)\n    \n    # 4. Nur generieren, falls die Identität noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?s1 owl:sameAs ?s2 .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# 1. Vorher-Beweis: Welche Namen besitzt die externe Ressource mc:CustomStone? (0 Zeilen / leer!)\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element ?name\nWHERE {\n    VALUES ?element { mc:CustomStone }\n    ?element mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\n# 2. Nachher-Beweis: Reasoner hat durch den gemeinsamen Primärschlüssel alle Namen auf mc:CustomStone übertragen\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?element ?name\nWHERE {\n    VALUES ?element { mc:CustomStone }\n    ?element mc:hasName ?name .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 15. owl:hasValue – Fixe Wertzuweisungen für Klassen (Schmelzrezepte)\n\n* **Was bedeutet das Konstrukt?**  \n  `owl:hasValue` definiert eine Wert-Restriktion ($\\exists R.\\{v\\}$): Eine Klasse umfasst per Definition alle Entitäten, die für eine bestimmte Eigenschaft $R$ exakt den vorgegebenen Zielwert $v$ aufweisen.\n* **Inferenz-Mechanismus:**  \n  Erfüllt ein Individuum die Bedingung $x \\xrightarrow{R} v$, ordnet der Reasoner dieses Individuum automatisch als Instanz der definierten Klasse ein ($x\\ \\text{a}\\ C$).\n* **Minecraft-Beispiel:**  \n  Schmelzrezepte (`mc:SmeltingRecipe`). Die Klasse umfasst alle Rezepte mit der Eigenschaft `mc:craftedAt mc:Furnace`. Das Rezept `mc:IronIngotRecipe` ist in den Rohdaten lediglich als allgemeines `mc:Recipe` typisiert. Der Reasoner stuft es automatisch als `mc:SmeltingRecipe` ein.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Typ-Zuweisung über owl:hasValue\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    ?instanz a ?restriktionsKlasse .\n}\nWHERE {\n    # 1. Ermittle definierte Klassen mit owl:hasValue Restriktion\n    ?restriktionsKlasse owl:equivalentClass ?restriction .\n    ?restriction a owl:Restriction ;\n                 owl:onProperty ?property ;\n                 owl:hasValue ?festerWert .\n    \n    # 2. Finde Instanzen mit genau diesem Eigenschaftswert\n    ?instanz ?property ?festerWert .\n    \n    # 3. Nur generieren, falls dieser Typ noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?instanz a ?restriktionsKlasse .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?rezept\nWHERE {\n    ?item mc:hasRecipe ?rezept .\n    ?rezept a mc:SmeltingRecipe .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?rezept\nWHERE {\n    ?item mc:hasRecipe ?rezept .\n    ?rezept a mc:SmeltingRecipe .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 16. owl:propertyChainAxiom – Verkettung von Eigenschaften (Property Chains)\n\n* **Was bedeutet das Konstrukt?**  \n  Ein `owl:propertyChainAxiom` definiert eine neue Eigenschaft als sequentielle Verkettung mehrerer Teil-Eigenschaften ($P_1 \\circ P_2 \\circ \\dots \\circ P_n \\sqsubseteq R$).\n* **Inferenz-Mechanismus:**  \n  Sobald im Graphen ein Pfad existiert, der der definierten Kette entspricht ($A \\xrightarrow{P_1} B \\xrightarrow{P_2} C \\xrightarrow{P_3} D$), leitet der Reasoner automatisch eine direkte Kante zwischen Start- und Zielknoten ab ($A \\xrightarrow{R} D$).\n* **Minecraft-Beispiel:**  \n  Direkter Materialbedarf (`mc:requiresMaterial`). Um von einem Werkzeug zu dessen Rohstoffen zu gelangen, müssen drei Zwischenschritte überwunden werden (`mc:hasRecipe` $\\rightarrow$ `mc:requiresIngredient` $\\rightarrow$ `mc:requiredItem`). Über die Property Chain erzeugt der Reasoner automatisiert direkte Kanten wie `mc:DiamondPickaxe mc:requiresMaterial mc:Diamond`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Pfad-Abkürzung via owl:propertyChainAxiom\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nCONSTRUCT {\n    ?item mc:requiresMaterial ?material .\n}\nWHERE {\n    ?item mc:hasRecipe / mc:requiresIngredient / mc:requiredItem ?material .\n    FILTER NOT EXISTS {\n        ?item mc:requiresMaterial ?material .\n    }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?material\nWHERE {\n    ?item mc:requiresMaterial ?material .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=test_minecraft_inferred.ttl]\nPREFIX mc: <http://www.minecraft.example/url/2002/>\n\nSELECT ?item ?material\nWHERE {\n    ?item mc:requiresMaterial ?material .\n}\nORDER BY ?item ?material",
     "metadata": {}
   }
 ]
