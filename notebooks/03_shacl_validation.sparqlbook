@@ -32,7 +32,7 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "![alt text](image.png)\n![alt text](image-1.png)\n![alt text](image-2.png)\n![alt text](image-3.png)\n![alt text](image-4.png)\n![alt text](image-5.png)\n![alt text](image-6.png)\n![alt text](image-7.png)\n![alt text](image-8.png)",
+    "value": "![alt text](../images/shacl/image.png)\n![alt text](../images/shacl/image-1.png)\n![alt text](../images/shacl/image-2.png)\n![alt text](../images/shacl/image-3.png)\n![alt text](../images/shacl/image-4.png)\n![alt text](../images/shacl/image-5.png)\n![alt text](../images/shacl/image-6.png)\n![alt text](../images/shacl/image-7.png)\n![alt text](../images/shacl/image-8.png)",
     "metadata": {}
   },
   {
