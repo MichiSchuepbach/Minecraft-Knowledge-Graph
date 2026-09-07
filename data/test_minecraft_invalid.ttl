@@ -1,0 +1,301 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix mc:    <http://www.minecraft.example/url/2002/> .
+
+# ==============================================================================
+# MINECRAFT ONTOLOGIE & SCHEMA (T-BOX)
+# ==============================================================================
+
+<http://www.minecraft.example/url/2002/> a owl:Ontology ;
+    dc:title "Minecraft Knowledge Graph Ontology"@de, "Minecraft Knowledge Graph Ontology"@en ;
+    dc:creator "Michael Schüpbach" ;
+    dc:date "2026-08-18" ;
+    owl:versionInfo "2.0 (Validation Testbed Invalid)" ;
+    rdfs:isDefinedBy <http://www.minecraft.example/url/2002/> .
+
+mc:minedWith owl:inverseOf mc:canMine .
+
+mc:Item a rdfs:Class ;
+    rdfs:label "Gegenstand"@de, "Item"@en ;
+    rdfs:subClassOf rdfs:Resource .
+
+mc:Recipe a rdfs:Class ;
+    rdfs:label "Rezept"@de, "Recipe"@en ;
+    rdfs:subClassOf rdfs:Resource .
+
+mc:IngredientRequirement a rdfs:Class ;
+    rdfs:label "Zutatenanforderung"@de, "Ingredient Requirement"@en ;
+    rdfs:subClassOf rdfs:Resource .
+
+mc:Block a rdfs:Class ;
+    rdfs:label "Block"@de, "Block"@en ;
+    rdfs:subClassOf mc:Item .
+
+mc:Tool a rdfs:Class ;
+    rdfs:label "Werkzeug"@de, "Tool"@en ;
+    rdfs:subClassOf mc:Item .
+
+mc:Material a rdfs:Class ;
+    rdfs:label "Material"@de, "Material"@en ;
+    rdfs:subClassOf mc:Item .
+
+mc:CraftingStation a rdfs:Class ;
+    rdfs:label "Herstellungsstation"@de, "Crafting Station"@en ;
+    rdfs:subClassOf mc:Block .
+
+mc:Workstation a owl:Class ;
+    owl:equivalentClass mc:CraftingStation .
+
+mc:SmeltingRecipe a owl:Class ;
+    owl:equivalentClass [
+        a owl:Restriction ;
+        owl:onProperty mc:craftedAt ;
+        owl:hasValue mc:Furnace
+    ] ;
+    rdfs:subClassOf mc:Recipe .
+
+mc:hasName a rdf:Property ;
+    rdfs:domain mc:Item ;
+    rdfs:range rdfs:Literal .
+
+mc:hasRecipe a rdf:Property ;
+    rdfs:domain mc:Item ;
+    rdfs:range mc:Recipe .
+
+mc:craftedAt a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:domain mc:Recipe ;
+    rdfs:range mc:CraftingStation .
+
+mc:requiresIngredient a rdf:Property ;
+    rdfs:domain mc:Recipe ;
+    rdfs:range mc:IngredientRequirement .
+
+mc:yields a rdf:Property ;
+    rdfs:domain mc:Recipe ;
+    rdfs:range rdfs:Literal .
+
+mc:requiredItem a rdf:Property ;
+    rdfs:domain mc:IngredientRequirement ;
+    rdfs:range mc:Item .
+
+mc:amount a rdf:Property ;
+    rdfs:domain mc:IngredientRequirement ;
+    rdfs:range rdfs:Literal .
+
+mc:requiresInteractionTool a rdf:Property ;
+    rdfs:domain mc:Item ;
+    rdfs:range mc:Tool .
+
+mc:minedWith a rdf:Property ;
+    rdfs:subPropertyOf mc:requiresInteractionTool ;
+    rdfs:domain mc:Block ;
+    rdfs:range mc:Tool .
+
+mc:harvestedWith a owl:ObjectProperty ;
+    owl:equivalentProperty mc:minedWith .
+
+mc:isAdjacentTo a owl:ObjectProperty, owl:SymmetricProperty ;
+    rdfs:domain mc:Block ;
+    rdfs:range mc:Block .
+
+mc:unlocksTierOf a owl:ObjectProperty, owl:TransitiveProperty ;
+    rdfs:domain mc:Tool ;
+    rdfs:range mc:Tool .
+
+# ==============================================================================
+# INSTANZEN (A-BOX) MIT 5 GEZIELTEN REALISTISCHEN FEHLERN
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# FEHLER 1: mc:OakLog (Verletzt mc:ItemShape)
+# mc:hasName fehlt komplett -> Löst sh:minCount 1 aus
+# ------------------------------------------------------------------------------
+mc:OakLog a mc:Block .
+
+# ------------------------------------------------------------------------------
+# FEHLER 4: mc:Cobblestone (Verletzt mc:BlockShape)
+# a) mc:minedWith verweist auf WoodenShovel -> Verletzt sh:in (...)
+# b) mc:density ist unerlaubt -> Verletzt sh:closed true
+# ------------------------------------------------------------------------------
+mc:Cobblestone a mc:Block ;
+    mc:hasName "Bruchstein"@de, "Cobblestone"@en ;
+    mc:minedWith mc:WoodenShovel ;
+    mc:density "2.5" .
+
+mc:IronOre a mc:Block ;
+    mc:hasName "Eisenerz"@de, "Iron Ore"@en ;
+    mc:minedWith mc:StonePickaxe .
+
+mc:Diamond a mc:Material ;
+    mc:hasName "Diamant"@de, "Diamond"@en ;
+    mc:minedWith mc:IronPickaxe .
+
+# ------------------------------------------------------------------------------
+# FEHLER 2: mc:Stick (Verletzt mc:RecipeShape)
+# Das Rezept hat Ausbeute 0 -> Löst sh:minInclusive 1 aus
+# ------------------------------------------------------------------------------
+mc:Stick a mc:Material ;
+    mc:hasName "Stock"@de, "Stick"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 0 ;                                     # Fehler: minInclusive 1 verletzt
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:OakPlanks ;
+            mc:amount 2
+        ]
+    ] .
+
+mc:Craftingtable a mc:CraftingStation, mc:Block ;
+    mc:hasName "Werkbank"@de, "Crafting Table"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:OakPlanks ;
+            mc:amount 4
+        ]
+    ] .
+
+mc:OakPlanks a mc:Block ;
+    mc:hasName "Eichenholzbretter"@de, "Oak Planks"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 4 ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:OakLog ;
+            mc:amount 1
+        ]
+    ] .
+
+# ------------------------------------------------------------------------------
+# FEHLER 3: mc:WoodenPickaxe (Verletzt mc:IngredientRequirementShape)
+# Die Bretter sind als reiner String "Eichenholzbretter" hinterlegt statt als mc:Item-IRI
+# ------------------------------------------------------------------------------
+mc:WoodenPickaxe a mc:Tool ;
+    mc:hasName "Holzspitzhacke"@de, "Wooden Pickaxe"@en ;
+    mc:durability 59 ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem "Eichenholzbretter" ;         # Fehler: Literal statt IRI / mc:Item
+            mc:amount 3
+        ], [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+mc:StonePickaxe a mc:Tool ;
+    mc:hasName "Steinspitzhacke"@de, "Stone Pickaxe"@en ;
+    mc:durability 131 ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Cobblestone ;
+            mc:amount 3
+        ], [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+mc:Furnace a mc:CraftingStation, mc:Block ;
+    mc:hasName "Ofen"@de, "Furnace"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Cobblestone ;
+            mc:amount 8
+        ]
+    ] .
+
+mc:IronIngot a mc:Material ;
+    mc:hasName "Eisenbarren"@de, "Iron Ingot"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Furnace ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:IronOre ;
+            mc:amount 1
+        ]
+    ] .
+
+mc:IronPickaxe a mc:Tool ;
+    mc:hasName "Eisenspitzhacke"@de, "Iron Pickaxe"@en ;
+    mc:durability 250 ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:IronIngot ;
+            mc:amount 3
+        ], [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+# ------------------------------------------------------------------------------
+# FEHLER 5: mc:DiamondPickaxe (Verletzt mc:ToolShape)
+# Falscher Name "Diamantschaufel" -> Regex sh:pattern "(Pickaxe|spitzhacke)$" schlägt an
+# ------------------------------------------------------------------------------
+mc:DiamondPickaxe a mc:Tool ;
+    mc:hasName "Diamantschaufel"@de ;
+    mc:durability 1561 ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Craftingtable ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Diamond ;
+            mc:amount 3
+        ], [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:Stick ;
+            mc:amount 2
+        ]
+    ] .
+
+mc:Furnace mc:isAdjacentTo mc:Craftingtable .
+
+mc:WoodenPickaxe mc:unlocksTierOf mc:StonePickaxe .
+mc:StonePickaxe mc:unlocksTierOf mc:IronPickaxe .
+mc:IronPickaxe mc:unlocksTierOf mc:DiamondPickaxe .
+
+# ------------------------------------------------------------------------------
+# FEHLER ZU SHAPE 6 (mc:CraftingStationShape)
+# mc:Anvil ist mc:CraftingStation, aber rdf:type mc:Block fehlt!
+# ------------------------------------------------------------------------------
+mc:Anvil a mc:CraftingStation ;
+    mc:hasName "Amboss"@de .
+
+
+# ------------------------------------------------------------------------------
+# FEHLER ZU SHAPE 9 (mc:ToolDurabilityShape)
+# mc:GoldenPickaxe ist ein mc:Tool, besitzt aber weder mc:durability noch mc:isUnbreakable!
+# ------------------------------------------------------------------------------
+mc:GoldenPickaxe a mc:Tool ;
+    mc:hasName "Goldspitzhacke"@de .

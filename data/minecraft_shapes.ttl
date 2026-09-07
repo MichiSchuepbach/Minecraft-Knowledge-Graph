@@ -1,0 +1,182 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix mc:    <http://www.minecraft.example/url/2002/> .
+
+
+
+# ------------------------------------------------------------------------------
+# 1. SHAPE FÜR GEGENSTÄNDE (mc:Item)
+# ------------------------------------------------------------------------------
+
+mc:ItemShape a sh:NodeShape ;
+    sh:targetClass mc:Item ;
+    sh:property [
+        sh:path mc:hasName ;
+        sh:name "Gegenstandsname"@de ;
+        sh:description "Jeder Gegenstand muss mindestens einen Namen als Sprach-Literal besitzen."@de ;
+        sh:minCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:uniqueLang true ;
+    ] .
+
+# ------------------------------------------------------------------------------
+# 2. SHAPE FÜR HERSTELLUNGSREZEPTE (mc:Recipe)
+# ------------------------------------------------------------------------------
+mc:RecipeShape a sh:NodeShape ;
+    sh:targetClass mc:Recipe ;
+    sh:property [
+        sh:path mc:craftedAt ;
+        sh:name "Herstellungsstation"@de ;
+        sh:description "Ein Rezept kann an maximal einer gültigen Station ausgeführt werden."@de ;
+        sh:maxCount 1 ;
+        sh:class mc:CraftingStation ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path mc:yields ;
+        sh:name "Ausbeute"@de ;
+        sh:description "Die Ausbeute muss eine positive Ganzzahl von mindestens 1 sein."@de ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+    ] .
+
+
+# ------------------------------------------------------------------------------
+# 3. SHAPE FÜR ZUTATEN (mc:IngredientRequirement)
+# ------------------------------------------------------------------------------
+mc:IngredientRequirementShape a sh:NodeShape ;
+    sh:targetClass mc:IngredientRequirement ;
+    sh:property [
+        sh:path mc:requiredItem ;       
+        sh:name "Benötigtes Item"@de ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class mc:Item ;
+        sh:nodeKind sh:IRI ;
+    ] ;
+    sh:property [
+        sh:path mc:amount ;
+        sh:name "Menge"@de ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+    ] .
+
+
+
+# ------------------------------------------------------------------------------
+# 4. GESCHLOSSENE SHAPE FÜR BLÖCKE (mc:Block)
+# ------------------------------------------------------------------------------
+mc:BlockShape a sh:NodeShape ;
+    sh:targetClass mc:Block ;
+    sh:closed true ;
+    sh:ignoredProperties ( 
+        rdf:type 
+        rdfs:label 
+        rdfs:comment 
+        rdfs:isDefinedBy 
+        owl:sameAs 
+        mc:requiresMaterial 
+        mc:harvestedWith 
+        mc:requiresInteractionTool 
+    ) ;
+    sh:property [
+        sh:path mc:hasName ;
+        sh:minCount 1 ;
+    ] ;
+    sh:property [
+        sh:path mc:minedWith ;
+        sh:name "Abbau-Werkzeug"@de ;
+        sh:description "Nur definierte Standard-Spitzhacken sind als Abbauwerkzeug zulässig."@de ;
+        sh:in ( mc:WoodenPickaxe mc:StonePickaxe mc:IronPickaxe mc:DiamondPickaxe ) ;
+    ] ;
+    sh:property [
+        sh:path mc:hasRecipe ;
+        sh:class mc:Recipe ;
+    ] ;
+    sh:property [
+        sh:path mc:isAdjacentTo ;
+        sh:class mc:Block ;
+    ] .
+
+# ------------------------------------------------------------------------------
+# 5. SHAPE FÜR WERKZEUGE (mc:Tool)
+# ------------------------------------------------------------------------------
+mc:ToolShape a sh:NodeShape ;
+    sh:targetClass mc:Tool ;
+    sh:property [
+        sh:path mc:hasName ;
+        sh:name "Werkzeug-Namensformat"@de ;
+        sh:description "Der Name eines Werkzeugs muss dem typischen Spitzhacken-Schema folgen."@de ;
+        sh:pattern "(Pickaxe|spitzhacke)$" ;
+        sh:message "Ein Werkzeugname muss auf 'Pickaxe' oder 'spitzhacke' enden."@de ;
+    ] .
+
+# ------------------------------------------------------------------------------
+# 6. SHAPE FÜR HERSTELLUNGSSTATIONEN (mc:CraftingStation)
+# ------------------------------------------------------------------------------
+mc:CraftingStationShape a sh:NodeShape ;
+    sh:targetClass mc:CraftingStation ;
+    sh:nodeKind sh:IRI ;
+    sh:property [
+        sh:path rdf:type ;
+        sh:name "Klassenzugehörigkeit als Block"@de ;
+        sh:description "Jede Herstellungsstation muss zwingend auch als mc:Block typisiert sein."@de ;
+        sh:hasValue mc:Block ;
+    ] .
+
+
+# ------------------------------------------------------------------------------
+# 7. EIGENSTÄNDIGE PROPERTY SHAPE (Global auf mc:minedWith)
+# ------------------------------------------------------------------------------
+mc:MinedWithPropertyShape a sh:PropertyShape ;
+    sh:targetSubjectsOf mc:minedWith ;
+    sh:path mc:minedWith ;
+    sh:name "Globales Abbau-Werkzeug"@de ;
+    sh:description "Jeder abbaubare Knoten muss mit einem Werkzeug (mc:Tool) abgebaut werden."@de ;
+    sh:minCount 1 ;
+    sh:class mc:Tool ;
+    sh:nodeKind sh:IRI .
+
+
+
+# ------------------------------------------------------------------------------
+# 8. SPEZIFISCHE TARGET-NODE SHAPE MIT SEQUENZ-PFAD
+# ------------------------------------------------------------------------------
+mc:CraftingtableIntegrityShape a sh:NodeShape ;
+    sh:targetNode mc:Craftingtable ;
+    sh:property [
+        sh:path ( [ sh:inversePath mc:craftedAt ] mc:requiresIngredient mc:requiredItem ) ;
+        sh:name "Zutaten-Erreichbarkeit"@de ;
+        sh:description "Rezepte an der Werkbank müssen auf gültige Items verweisen."@de ;
+        sh:class mc:Item ;
+    ] .
+
+
+# ------------------------------------------------------------------------------
+# 9. LOGISCHE SHAPE (sh:or) FÜR WERKZEUGE
+# ------------------------------------------------------------------------------
+mc:ToolDurabilityShape a sh:NodeShape ;
+    sh:targetClass mc:Tool ;
+    sh:or (
+        [
+            sh:property [
+                sh:path mc:durability ;
+                sh:minCount 1 ;
+                sh:datatype xsd:integer ;
+                sh:minInclusive 1 ;
+            ] ;
+        ]
+        [
+            sh:property [
+                sh:path mc:isUnbreakable ;
+                sh:hasValue true ;
+            ] ;
+        ]
+    ) .
