@@ -293,24 +293,17 @@ mc:Furnace a mc:CraftingStation ;
         ]
     ] .
 
-# Das benannte Schmelzrezept mit beiden Zielen (Furnace und SmeltingFurnace):
-mc:IronIngotRecipe a mc:Recipe ;
-    mc:yields 1 ;
-    mc:craftedAt mc:Furnace , mc:SmeltingFurnace ;
-    mc:requiresIngredient [
-        a mc:IngredientRequirement ;
-        mc:requiredItem mc:IronOre ;
-        mc:amount 1
-    ] .
-
-# Das benannte Schmelzrezept als eigenständige Ressource:
-mc:IronIngotRecipe a mc:Recipe ;
-    mc:yields 1 ;
-    mc:craftedAt mc:Furnace ;
-    mc:requiresIngredient [
-        a mc:IngredientRequirement ;
-        mc:requiredItem mc:IronOre ;
-        mc:amount 1
+mc:IronIngot a mc:Material ;
+    mc:hasName "Eisenbarren"@de, "Iron Ingot"@en ;
+    mc:hasRecipe [
+        a mc:Recipe ;
+        mc:yields 1 ;
+        mc:craftedAt mc:Furnace ;
+        mc:requiresIngredient [
+            a mc:IngredientRequirement ;
+            mc:requiredItem mc:IronOre ;
+            mc:amount 1
+        ]
     ] .
 
 mc:IronPickaxe a mc:Tool ;
@@ -357,6 +350,8 @@ mc:IronPickaxe mc:unlocksTierOf mc:DiamondPickaxe .
 # sameAs
 mc:WorkBench owl:sameAs mc:Craftingtable .
 
-# InverseFunctionalProperty-Testdaten: Eindeutiger Primärschlüssel
-mc:Cobblestone mc:hasItemCode mc:ID_Cobble_04 .
-mc:CustomStone mc:hasItemCode mc:ID_Cobble_04 .
+# Haltbarkeitswerte für Werkzeuge
+mc:WoodenPickaxe mc:durability 59 .
+mc:StonePickaxe  mc:durability 131 .
+mc:IronPickaxe   mc:durability 250 .
+mc:DiamondPickaxe mc:durability 1561 .

@@ -40,6 +40,10 @@ dc:description rdf:type owl:AnnotationProperty .
 dc:title rdf:type owl:AnnotationProperty .
 
 
+###  http://www.minecraft.example/url/2002/durability
+mc:durability rdf:type owl:AnnotationProperty .
+
+
 #################################################################
 #    Object Properties
 #################################################################
@@ -308,7 +312,6 @@ mc:Cobblestone rdf:type owl:NamedIndividual ,
                         rdfs:Resource ,
                         owl:Thing ;
                mc:harvestedWith mc:WoodenPickaxe ;
-               mc:hasItemCode mc:ID_Cobble_04 ;
                mc:minedWith mc:WoodenPickaxe ;
                mc:requiresInteractionTool mc:WoodenPickaxe ;
                mc:hasName "Bruchstein"@de ,
@@ -325,8 +328,7 @@ mc:Craftingtable rdf:type owl:NamedIndividual ,
                           owl:Thing ;
                  owl:sameAs mc:WorkBench ;
                  mc:hasRecipe _:genid5 ;
-                 mc:isAdjacentTo mc:Furnace ,
-                                 mc:SmeltingFurnace ;
+                 mc:isAdjacentTo mc:Furnace ;
                  mc:requiresMaterial mc:OakPlanks ;
                  mc:hasName "Crafting Table"@en ,
                             "Werkbank"@de .
@@ -342,20 +344,6 @@ _:genid6 rdf:type mc:IngredientRequirement ;
 
 ###  http://www.minecraft.example/url/2002/WorkBench
 mc:WorkBench rdf:type owl:NamedIndividual .
-
-
-###  http://www.minecraft.example/url/2002/CustomStone
-mc:CustomStone rdf:type owl:NamedIndividual ,
-                        mc:Block ,
-                        mc:Item ,
-                        rdfs:Resource ,
-                        owl:Thing ;
-               mc:harvestedWith mc:WoodenPickaxe ;
-               mc:hasItemCode mc:ID_Cobble_04 ;
-               mc:minedWith mc:WoodenPickaxe ;
-               mc:requiresInteractionTool mc:WoodenPickaxe ;
-               mc:hasName "Bruchstein"@de ,
-                          "Cobblestone"@en .
 
 
 ###  http://www.minecraft.example/url/2002/Diamond
@@ -382,7 +370,8 @@ mc:DiamondPickaxe rdf:type owl:NamedIndividual ,
                   mc:requiresMaterial mc:Diamond ,
                                       mc:Stick ;
                   mc:hasName "Diamantspitzhacke"@de ,
-                             "Diamond Pickaxe"@en .
+                             "Diamond Pickaxe"@en ;
+                  mc:durability 1561 .
 
 _:genid7 rdf:type mc:Recipe ;
           mc:craftedAt mc:Craftingtable ;
@@ -410,8 +399,7 @@ mc:Furnace rdf:type owl:NamedIndividual ,
            mc:hasRecipe _:genid10 ;
            mc:isAdjacentTo mc:Craftingtable ,
                            mc:WorkBench ;
-           mc:requiresMaterial mc:Cobblestone ,
-                               mc:CustomStone ;
+           mc:requiresMaterial mc:Cobblestone ;
            mc:hasName "Furnace"@en ,
                       "Ofen"@de .
 
@@ -425,34 +413,21 @@ _:genid11 rdf:type mc:IngredientRequirement ;
            mc:amount 8 .
 
 
-###  http://www.minecraft.example/url/2002/ID_Cobble_04
-mc:ID_Cobble_04 rdf:type owl:NamedIndividual ,
-                         rdfs:Resource ,
-                         owl:Thing .
-
-
 ###  http://www.minecraft.example/url/2002/IronIngot
 mc:IronIngot rdf:type owl:NamedIndividual ,
                       mc:Item ,
+                      mc:Material ,
                       rdfs:Resource ,
-                      owl:Thing .
+                      owl:Thing ;
+             mc:hasRecipe _:genid12 ;
+             mc:requiresMaterial mc:IronOre ;
+             mc:hasName "Eisenbarren"@de ,
+                        "Iron Ingot"@en .
 
-
-###  http://www.minecraft.example/url/2002/IronIngotRecipe
-mc:IronIngotRecipe rdf:type owl:NamedIndividual ,
-                            mc:Recipe ,
-                            mc:SmeltingRecipe ,
-                            rdfs:Resource ,
-                            owl:Thing ;
-                   mc:craftedAt mc:Furnace ,
-                                mc:SmeltingFurnace ;
-                   mc:requiresIngredient _:genid12 ,
-                                         _:genid13 ;
-                   mc:yields 1 .
-
-_:genid12 rdf:type mc:IngredientRequirement ;
-           mc:requiredItem mc:IronOre ;
-           mc:amount 1 .
+_:genid12 rdf:type mc:Recipe ;
+           mc:craftedAt mc:Furnace ;
+           mc:requiresIngredient _:genid13 ;
+           mc:yields 1 .
 
 _:genid13 rdf:type mc:IngredientRequirement ;
            mc:requiredItem mc:IronOre ;
@@ -484,7 +459,8 @@ mc:IronPickaxe rdf:type owl:NamedIndividual ,
                                    mc:Stick ;
                mc:unlocksTierOf mc:DiamondPickaxe ;
                mc:hasName "Eisenspitzhacke"@de ,
-                          "Iron Pickaxe"@en .
+                          "Iron Pickaxe"@en ;
+               mc:durability 250 .
 
 _:genid14 rdf:type mc:Recipe ;
            mc:craftedAt mc:Craftingtable ;
@@ -531,22 +507,6 @@ _:genid18 rdf:type mc:IngredientRequirement ;
            mc:amount 1 .
 
 
-###  http://www.minecraft.example/url/2002/SmeltingFurnace
-mc:SmeltingFurnace rdf:type owl:NamedIndividual ,
-                            mc:Block ,
-                            mc:CraftingStation ,
-                            mc:Item ,
-                            mc:Workstation ,
-                            rdfs:Resource ,
-                            owl:Thing ;
-                   mc:isAdjacentTo mc:Craftingtable ,
-                                   mc:WorkBench ;
-                   mc:requiresMaterial mc:Cobblestone ,
-                                       mc:CustomStone ;
-                   mc:hasName "Furnace"@en ,
-                              "Ofen"@de .
-
-
 ###  http://www.minecraft.example/url/2002/Stick
 mc:Stick rdf:type owl:NamedIndividual ,
                   mc:Item ,
@@ -576,12 +536,12 @@ mc:StonePickaxe rdf:type owl:NamedIndividual ,
                 mc:canMine mc:IronOre ;
                 mc:hasRecipe _:genid21 ;
                 mc:requiresMaterial mc:Cobblestone ,
-                                    mc:CustomStone ,
                                     mc:Stick ;
                 mc:unlocksTierOf mc:DiamondPickaxe ,
                                  mc:IronPickaxe ;
                 mc:hasName "Steinspitzhacke"@de ,
-                           "Stone Pickaxe"@en .
+                           "Stone Pickaxe"@en ;
+                mc:durability 131 .
 
 _:genid21 rdf:type mc:Recipe ;
            mc:craftedAt mc:Craftingtable ;
@@ -604,8 +564,7 @@ mc:WoodenPickaxe rdf:type owl:NamedIndividual ,
                           mc:Tool ,
                           rdfs:Resource ,
                           owl:Thing ;
-                 mc:canMine mc:Cobblestone ,
-                            mc:CustomStone ;
+                 mc:canMine mc:Cobblestone ;
                  mc:hasRecipe _:genid24 ;
                  mc:requiresMaterial mc:OakPlanks ,
                                      mc:Stick ;
@@ -613,7 +572,8 @@ mc:WoodenPickaxe rdf:type owl:NamedIndividual ,
                                   mc:IronPickaxe ,
                                   mc:StonePickaxe ;
                  mc:hasName "Holzspitzhacke"@de ,
-                            "Wooden Pickaxe"@en .
+                            "Wooden Pickaxe"@en ;
+                 mc:durability 59 .
 
 _:genid24 rdf:type mc:Recipe ;
            mc:craftedAt mc:Craftingtable ;
@@ -638,8 +598,7 @@ mc:WorkBench rdf:type owl:NamedIndividual ,
                       mc:Workstation ,
                       rdfs:Resource ,
                       owl:Thing ;
-             mc:isAdjacentTo mc:Furnace ,
-                             mc:SmeltingFurnace ;
+             mc:isAdjacentTo mc:Furnace ;
              mc:requiresMaterial mc:OakPlanks ;
              mc:hasName "Crafting Table"@en ,
                         "Werkbank"@de .

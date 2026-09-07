@@ -92,7 +92,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Umkehrung inverser Eigenschaften (owl:inverseOf)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Drehe Subjekt und Objekt für die inverse Eigenschaft um\n    ?o ?invProperty ?s .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?property ?o .\n    \n    # 2. Prüfe im Schema, ob eine inverse Eigenschaft deklariert ist (beidseitig prüfbar)\n    { ?property owl:inverseOf ?invProperty . }\n    UNION\n    { ?invProperty owl:inverseOf ?property . }\n    \n    # 3. Nur ausgeben, falls diese inverse Verbindung noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?o ?invProperty ?s .\n    }\n}",
+    "value": "# [endpoint=test_minecraft.ttl]\n# Inferenz-Simulation: Umkehrung inverser Eigenschaften (owl:inverseOf)\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nCONSTRUCT {\n    # Drehe Subjekt und Objekt für die inverse Eigenschaft um\n    ?o ?invProperty ?s .\n}\nWHERE {\n    # 1. Finde eine konkrete Beziehung in den Daten\n    ?s ?property ?o .\n    \n    # 2. Prüfe im Schema, ob eine inverse Eigenschaft deklariert ist (beidseitig prüfbar)\n    { ?property owl:inverseOf ?invProperty . }\n    \n    \n    # 3. Nur ausgeben, falls diese inverse Verbindung noch nicht explizit existiert\n    FILTER NOT EXISTS {\n        ?o ?invProperty ?s .\n    }\n}",
     "metadata": {}
   },
   {
